@@ -1,0 +1,7 @@
+# Chương 1: Mở đầu
+
+Đây là đoạn văn mẫu để thử chức năng bảo vệ chữ. Nếu bạn nhìn thấy chữ tiếng Việt đọc được bình thường, nghĩa là font bảo mật đang hoạt động.
+
+Thử bôi đen đoạn này rồi dán sang nơi khác: chữ sẽ bị loạn. Đây chính là cách chống sao chép của trang.
+
+Bạn có thể xoá thư mục "vi-du" khi đã đăng truyện thật.

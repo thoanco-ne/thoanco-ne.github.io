@@ -1,0 +1,5 @@
+# Chương 2: Gặp gỡ
+
+Mỗi đoạn văn cách nhau một dòng trống. Dòng đầu tiên của file bắt đầu bằng dấu thăng và một khoảng trắng là tiêu đề chương.
+
+Thỏ ăn cỏ, cỏ ăn thỏ, thỏ nào cũng thích đọc truyện đến khuya.
