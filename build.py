@@ -33,7 +33,7 @@ VIET_LOWER = "aàáảãạăằắẳẵặâầấẩẫậeèéẻẽẹêề
 VIET_UPPER = "AÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬEÈÉẺẼẸÊỀẾỂỄỆIÌÍỈĨỊOÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢUÙÚỦŨỤƯỪỨỬỮỰYỲÝỶỸỴĐ"
 VIET_CHARS = VIET_LOWER + VIET_UPPER
 ZERO_WIDTH_CHARS = ["‌", "​", "﻿"]
-
+ 
 
 def generate_secure_font(input_path, output_path):
     font = TTFont(input_path)
