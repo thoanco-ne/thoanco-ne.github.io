@@ -1,0 +1,69 @@
+c1: Chương 1: Chuyện vui sắp đến
+c2: Chương 2: Anh hùng cứu mỹ nhân
+c3: Chương 4 Không quen biết
+c4: Chương 5 Độ tương thích 95%
+c5: Chương 6 Tại sao khóc
+c6: Chương 7: Tiểu kẻ lừa đảo
+c7: Chương 8 Bằng chứng
+c8: Chương 9: Trọng chứng
+c9: Chương 10: Vật chơi
+c10: Chương 11: Dạy bảo
+c11: Chương 12 Ren trắng
+c12: Chương 14 Hẹn hò
+c13: Chương 15 Ta không muốn tẩy đi dấu vết này
+c14: Chương 16: Điều ước sinh nhật
+c15: Chương 17 Độ tương thích 98%
+c16: Chương 18: Mang ơn đeo đức
+c17: Chương 19: Ta muốn rời đi
+c18: Chương 20: Bài xích và cô lập
+c19: Chương sau vào v, dự báo trước thời kỳ phát tình của Tiểu Kiều sẽ xuất hiện rực rỡ! Liệu thiếu gia có ăn được thịt không, có ai muốn đặt cược không nào :)
+c20: Chương 21: A Dã, cầu ngươi
+c21: Chương 22: Là ngươi không cần ta trước
+c22: Chương 23 Omega của ta
+c23: Chương 24 Không lên được mặt bàn
+c24: Chương 25: Tiểu Kiều ngoan quá
+c25: Chương 26: Kỳ dễ cảm
+c26: Chương 27 Ta sẽ ở bên ngươi
+c27: Chương 28 Hôn lễ đẩy sớm
+c28: Chương 29: Kẻ thứ ba
+c29: Chương 30: Nhuốm đầy mùi vị của ta
+c30: Chương 31: Suýt chút nữa
+c31: Chương sau là nút thắt lớn nhất của văn bản này, ta xin phép ôm đầu chạy trốn trước đây, đếm ngược cái chết giả thật rồi!
+c32: Chương 32: Cố ý tiếp cận
+c33: Chương 33 Ngươi náo loạn đủ chưa
+c34: Chương 34 Ngươi dạy ta cách yêu ngươi
+c35: Chương 35 Ta sẽ không đợi ngươi nữa
+c36: Chương 37: Tung tích không rõ
+c37: Chương 38: Sống phải thấy người, chết phải thấy xác
+c38: Chương 39: Ta muốn xóa sạch dấu ấn này
+c39: Chương 40: Tái sinh trong lửa đỏ
+c40: Chương 41: Nhân sinh hoàn toàn mới
+c41: Chương 42: Ngươi xứng đáng được đối xử tử tế
+c42: Chương 43 Hình như ta sắp tìm được ngươi rồi
+c43: Chương sau gặp nhé
+c44: Chương 44 Ngươi đem dấu vết của ta đi đâu rồi
+c45: Chương 45 Ngươi căn bản không hề mất trí nhớ, đúng không?
+c46: Chương sau thứ Năm gặp lại! Con đường truy thê của thiếu gia còn dài lắm
+c47: Chương 46: Tránh xa ta ra
+c48: Chương 47: Quyền xử lý
+c49: Chương 48: Là ta sai hoàn toàn
+c50: Chương 49: Cười với ta một cái
+c51: Chương 50 Ta là vị hôn phu của hắn
+c52: Chương 51 Ta đã không còn yêu ngươi nữa
+c53: Chương 52 Ta có thể chịu trách nhiệm với ngươi
+c54: Chương 53: Nhòm ngó Omega của ta
+c55: Chương 54: Hồn xiêu phách lạc
+c56: Chương 55 Đừng đuổi ta đi
+c57: Chương 56: Trên người ngươi có mùi của hắn
+c58: Chương 57 Đau mới nhớ lâu
+c59: Chương 58: Ta sẽ mất kiểm soát
+c60: Chương 59: Những thứ này đều không quan trọng bằng ngươi
+c61: Chương 60: Yêu là để mặc ngươi tự do sinh trưởng
+c62: Chương 61 Ta sẽ không để bất cứ ai làm hại ngươi
+c63: Chương 62: Ta chỉ muốn ở bên cạnh ngươi
+c64: Chương 63 Lùi lại một bước
+c65: Chương 64 Ngươi đừng sợ, ta tới rồi
+c66: Chương 65 Tìm được chó rồi
+c67: Chương 66: Di chúc
+c68: Chương 67 Hãy dũng cảm đi yêu đi
+c69: Chương 68: Đi đến cuối cùng【Chương kết】
