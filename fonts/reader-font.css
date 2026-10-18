@@ -1,0 +1,6 @@
+@font-face {
+  font-family: "SecureFont";
+  src: url("./fonts/secure-font.woff2") format("woff2");
+  font-display: swap;
+}
+.chapter-content { font-family: "SecureFont", serif; }
