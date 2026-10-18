@@ -126,6 +126,32 @@ def build_chapter_index(story_folders):
     print("Đã tạo data/chapters.json cho:", list(index))
 
 
+CURSOR_MAX = 32   # con trỏ chuột nên tối đa 32x32 px
+
+
+def shrink_cursors():
+    """Tự thu nhỏ ảnh con trỏ (images/cursor*.png) về tối đa 32x32 trong bản phát hành.
+    Ảnh gốc trong repo giữ nguyên, bạn tải ảnh to cỡ nào cũng được."""
+    folder = os.path.join(OUTPUT_DIR, "images")
+    if not os.path.isdir(folder):
+        return
+    try:
+        from PIL import Image
+    except ImportError:
+        print("Cảnh báo: chưa cài Pillow nên không tự thu nhỏ ảnh con trỏ.")
+        return
+    resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
+    for name in sorted(os.listdir(folder)):
+        if name.lower().startswith("cursor") and name.lower().endswith(".png"):
+            path = os.path.join(folder, name)
+            im = Image.open(path).convert("RGBA")
+            if max(im.size) > CURSOR_MAX:
+                old = im.size
+                im.thumbnail((CURSOR_MAX, CURSOR_MAX), resample)
+                im.save(path)
+                print("Đã thu nhỏ", name, old, "->", im.size)
+
+
 def main():
     if os.path.exists(OUTPUT_DIR):
         shutil.rmtree(OUTPUT_DIR)
@@ -141,6 +167,8 @@ def main():
     for folder in ("images", "data"):
         if os.path.isdir(folder):
             shutil.copytree(folder, os.path.join(OUTPUT_DIR, folder), dirs_exist_ok=True)
+
+    shrink_cursors()
 
     # Tự quét các thư mục truyện (thư mục nào có file .txt)
     system_folders = {".git", ".github", "fonts", "public", "images", "data",

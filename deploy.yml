@@ -1,18 +1,15 @@
 name: Phát hành web
 
-# Chạy mỗi khi bạn đăng file mới, mỗi 30 phút (để cập nhật bình luận), hoặc bấm tay trong tab Actions
+# Chạy mỗi khi bạn đăng file mới, hoặc bấm tay trong tab Actions
 on:
   push:
     branches: [main]
-  schedule:
-    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
-  discussions: read
 
 concurrency:
   group: pages
@@ -34,29 +31,7 @@ jobs:
           python-version: "3.12"
 
       - name: Cài thư viện xử lý font
-        run: pip install fonttools brotli
-
-      # Gom bình luận mới (nếu chưa bật Discussions thì bỏ qua, web vẫn chạy)
-      - name: Gom bình luận
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          OWNER="${GITHUB_REPOSITORY%/*}"
-          NAME="${GITHUB_REPOSITORY#*/}"
-          gh api graphql -f owner="$OWNER" -f name="$NAME" -f query='
-            query($owner:String!, $name:String!){
-              repository(owner:$owner, name:$name){
-                discussions(first:30, orderBy:{field:UPDATED_AT, direction:DESC}){
-                  nodes{ comments(last:30){ nodes{ url body createdAt author{ login avatarUrl } } } }
-                }
-              }
-            }' > raw.json
-          jq '[.data.repository.discussions.nodes[].comments.nodes[]
-               | { author: (.author.login // "ẩn danh"), avatar: (.author.avatarUrl // ""),
-                   body: (.body | gsub("\\s+"; " ") | .[0:200]), createdAt: .createdAt, url: .url }]
-              | sort_by(.createdAt) | reverse | .[0:30]' raw.json > data/comments.new.json
-          mv data/comments.new.json data/comments.json
+        run: pip install fonttools brotli pillow
 
       - name: Đảo ký tự và đóng gói
         env:
