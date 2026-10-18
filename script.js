@@ -11,8 +11,8 @@
    ========================================================= */
 const STORIES = [
   {
-    title: "Truyện Ví Dụ", author: "[Tác giả]", length: "2 chương", genres: ["[Thể loại]"],
-    cover: "", folder: "vi-du", status: "ongoing",
+    title: "Trầm Kiều", author: "[gì đó]", length: "63 chương", genres: ["[ngược, HE, đổi công]"],
+    cover: "", folder: "tramkieu", status: "ongoing",
     chapters: [
       { id: "chuong-2", title: "Chương 2: Gặp gỡ", date: "2026-10-18" },
       { id: "chuong-1", title: "Chương 1: Mở đầu", date: "2026-10-17" }
