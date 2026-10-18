@@ -95,7 +95,7 @@ def main():
 
     # Sao chép trang web
     for name in os.listdir("."):
-        if name.endswith(".html") or name in ("style.css", "script.js"):
+        if name.endswith((".html", ".css", ".js")):
             shutil.copy(name, os.path.join(OUTPUT_DIR, name))
     for folder in ("images", "data"):
         if os.path.isdir(folder):
