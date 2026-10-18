@@ -69,6 +69,41 @@
     .toc a.current{font-weight:700;background:var(--pink)}
     .muted{color:#a98d84;font-size:.9rem}
     noscript{display:block;padding:20px;text-align:center}
+
+    /* ===== BÌNH LUẬN CHƯƠNG + TỪNG ĐOẠN ===== */
+    input,textarea{-webkit-user-select:text;user-select:text}
+    .hint{font-size:.85rem;margin:4px 2px 0}
+    .cbox{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
+    .cbox h2{margin:0 0 8px;font-family:var(--font-hand);font-weight:400;font-size:1.25rem;color:var(--brown)}
+    body.dark .cbox h2{color:#e3a1a1}
+    .cbox h2 small{font-size:.7em;opacity:.8}
+    .clist{max-height:260px;overflow-y:auto;margin-bottom:10px;scrollbar-width:thin;scrollbar-color:var(--pink-d) transparent}
+    .citem{padding:7px 4px;border-bottom:1px dashed var(--line);font-size:.9rem}
+    .citem b{color:var(--brown-d)}
+    .citem time{float:right;font-size:.72rem;color:#a98d84}
+    .citem p{margin:2px 0 0;overflow-wrap:anywhere;white-space:pre-line}
+    .cform{display:flex;flex-direction:column;gap:6px}
+    .cform label{font-size:.85rem}
+    .cform input[type=text],.cform textarea{
+      width:100%;font:inherit;color:var(--text);background:var(--bg);
+      border:2px solid var(--line);border-radius:8px;padding:7px 10px;
+    }
+    .cform textarea{resize:vertical;min-height:72px}
+    .cform input:focus-visible,.cform textarea:focus-visible{outline:3px solid var(--pink-d);outline-offset:1px}
+    .chp{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0}
+    .cstatus{min-height:1.2em;margin:0;font-size:.85rem;color:#a14d4d}
+    .cstatus.ok{color:#4c7a4f}
+    .csend{align-self:flex-start}
+    .csend:disabled{opacity:.6;cursor:default}
+    .pmodal{position:fixed;inset:0;z-index:9500;display:grid;place-items:center;background:rgba(90,64,58,.55);padding:14px}
+    .pmodal[hidden]{display:none}
+    .pcard{position:relative;width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--card);
+      border:3px solid var(--brown);border-radius:14px;padding:34px 16px 16px}
+    .pcard h3{margin:0 0 8px;font-family:var(--font-hand);font-weight:400;font-size:1.3rem;color:var(--brown)}
+    body.dark .pcard h3{color:#e3a1a1}
+    .pquote{font-family:'SecuredFont',serif;font-size:.95rem;margin:0 0 10px;padding:6px 10px;
+      border-left:3px solid var(--pink-d);background:var(--pink);border-radius:4px;overflow-wrap:anywhere}
+    .pclose{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer;color:var(--brown-d)}
   </style>
 </head>
 <body>
@@ -86,6 +121,7 @@
   </div>
 
   <p class="story-name" id="story-name"></p>
+  <p class="muted hint" id="para-hint" hidden>Chạm vào biểu tượng 💬 ở cuối mỗi đoạn để bình luận riêng cho đoạn đó.</p>
 
   <!-- Chế độ đọc chương -->
   <section id="reader" hidden>
@@ -98,6 +134,21 @@
       <a class="btn" id="btn-prev" href="#">← chương trước</a>
       <a class="btn" id="btn-next" href="#">chương sau →</a>
     </div>
+
+    <!-- Bình luận cả chương (không cần tài khoản) -->
+    <section class="cbox" id="chapter-comments" hidden aria-labelledby="cc-title">
+      <h2 id="cc-title">💬 Bình luận chương <small id="cc-count"></small></h2>
+      <div class="clist" id="cc-list"><p class="muted">Đang tải…</p></div>
+      <form class="cform" id="cc-form" autocomplete="off">
+        <label for="cc-name">Tên của bạn</label>
+        <input id="cc-name" type="text" maxlength="30" placeholder="Khách qua đường">
+        <label for="cc-body">Bình luận</label>
+        <textarea id="cc-body" maxlength="500" rows="3" placeholder="Bạn nghĩ gì về chương này?"></textarea>
+        <input id="cc-site" class="chp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="cstatus" id="cc-status" role="status"></p>
+        <button class="btn csend" id="cc-send" type="submit">Gửi bình luận</button>
+      </form>
+    </section>
   </section>
 
   <!-- Chế độ xem mục lục -->
@@ -105,10 +156,34 @@
     <div id="story-card-toc" class="toc" style="background:var(--card);border:2px solid var(--line);border-radius:12px;padding:8px 6px"></div>
   </section>
 
+  <!-- Bình luận từng đoạn -->
+  <div class="pmodal" id="pmodal" hidden>
+    <div class="pcard" role="dialog" aria-modal="true" aria-labelledby="pm-title">
+      <button class="pclose" id="pm-close" type="button" aria-label="Đóng">✕</button>
+      <h3 id="pm-title">Bình luận đoạn</h3>
+      <p class="pquote" id="pm-quote"></p>
+      <div class="clist" id="pm-list"></div>
+      <form class="cform" id="pm-form" autocomplete="off">
+        <label for="pm-name">Tên của bạn</label>
+        <input id="pm-name" type="text" maxlength="30" placeholder="Khách qua đường">
+        <label for="pm-body">Bình luận</label>
+        <textarea id="pm-body" maxlength="500" rows="3" placeholder="Viết gì đó về đoạn này…"></textarea>
+        <input id="pm-site" class="chp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="cstatus" id="pm-status" role="status"></p>
+        <button class="btn csend" id="pm-send" type="submit">Gửi bình luận</button>
+      </form>
+    </div>
+  </div>
+
   <p class="muted" id="message" hidden></p>
   <noscript>Trang cần bật JavaScript để đọc truyện.</noscript>
 </div>
 
+<!-- Firebase (lưu bình luận) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<script src="comments-core.js"></script>
 <script>
 (function () {
   "use strict";
@@ -206,6 +281,7 @@
       $("#chapter-title").textContent = title || CHAPTER;
       document.title = (title || "Đọc truyện") + " · thỏ ăn cỏ";
 
+      commentsOn = !!(window.TAC && TAC.init());
       // "closed" shadow root: mã trên trang không truy cập được vào nội dung bên trong
       var host = $("#secure-shadow-root");
       host.textContent = "";
@@ -214,17 +290,28 @@
       var style = document.createElement("style");
       style.textContent =
         "#story-content{font-family:'SecuredFont',serif;line-height:1.9;color:inherit;font-size:" + fontSize + "px}" +
-        ".p{margin:0 0 1rem;white-space:pre-line;word-break:break-word}";
+        ".p{margin:0 0 1rem;white-space:pre-line;word-break:break-word}" + PC_CSS + (commentsOn ? "" : ".pc{display:none}");
       shadow.appendChild(style);
 
       var content = document.createElement("div");
       content.id = "story-content";
-      paras.forEach(function (p) {
+      paras.forEach(function (p, i) {
         var d = document.createElement("div");
         d.className = "p";
-        d.textContent = p;        // textContent: không chèn mã HTML nên an toàn
+        d.setAttribute("data-i", String(i));
+        d.appendChild(document.createTextNode(p));   // văn bản thuần: không chèn mã HTML nên an toàn
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "pc";
+        b.setAttribute("data-i", String(i));
+        b.setAttribute("aria-label", "Bình luận đoạn " + (i + 1));
+        b.textContent = "💬";
+        b.addEventListener("click", function () { openPara(i); });
+        d.appendChild(document.createTextNode(" "));
+        d.appendChild(b);
         content.appendChild(d);
       });
+      paraTexts = paras;
       shadow.appendChild(content);
 
       $("#reader").hidden = false;
@@ -233,8 +320,141 @@
       var prev = $("#btn-prev"), next = $("#btn-next");
       if (idx > 0) { prev.href = link(chapters[idx - 1].id); } else { prev.setAttribute("aria-disabled", "true"); }
       if (idx >= 0 && idx < chapters.length - 1) { next.href = link(chapters[idx + 1].id); } else { next.setAttribute("aria-disabled", "true"); }
-      window.scrollTo(0, 0);
+      startChapterComments();
+      var jump = parseInt(params.get("p"), 10);
+      if (!isNaN(jump) && jump >= 0 && jump < paras.length) {
+        setTimeout(function () { jumpToPara(jump); }, 150);
+      } else {
+        window.scrollTo(0, 0);
+      }
     });
+  }
+
+  /* ---------- bình luận chương và từng đoạn ---------- */
+  var commentsOn = false;
+  var paraTexts = [];
+  var allComments = [];
+  var activePara = null;
+  var PC_CSS =
+    ".pc{margin-left:.3em;border:0;background:none;cursor:pointer;font:inherit;font-family:system-ui,sans-serif;font-size:.65em;" +
+    "line-height:1;opacity:.35;padding:.15em .3em;color:inherit;vertical-align:middle;-webkit-user-select:none;user-select:none}" +
+    ".pc:hover,.pc:focus-visible{opacity:1}" +
+    ".pc.has{opacity:1;background:#f7d8d8;color:#5a403a;border-radius:999px;padding:.2em .6em;font-weight:700}" +
+    ".p.flash{background:rgba(244,143,177,.25);border-radius:4px;transition:background .6s}";
+
+  function ago(ms) {
+    var s = Math.max(0, (Date.now() - ms) / 1000);
+    if (!ms) return "";
+    if (s < 60) return "vừa xong";
+    if (s < 3600) return Math.floor(s / 60) + " phút trước";
+    if (s < 86400) return Math.floor(s / 3600) + " giờ trước";
+    if (s < 86400 * 30) return Math.floor(s / 86400) + " ngày trước";
+    return new Date(ms).toLocaleDateString("vi-VN");
+  }
+
+  function renderList(box, items, emptyText) {
+    box.textContent = "";
+    if (!items.length) {
+      var e = document.createElement("p");
+      e.className = "muted";
+      e.textContent = emptyText;
+      box.appendChild(e);
+      return;
+    }
+    items.forEach(function (c) {
+      var d = document.createElement("div");
+      d.className = "citem";
+      var t = document.createElement("time");
+      t.textContent = ago(c.t);
+      var b = document.createElement("b");
+      b.textContent = c.name || "ẩn danh";
+      var p = document.createElement("p");
+      p.textContent = c.body || "";
+      d.appendChild(t); d.appendChild(b); d.appendChild(p);
+      box.appendChild(d);
+    });
+  }
+
+  function wireForm(prefix, getTarget) {
+    var form = $("#" + prefix + "-form"), nameEl = $("#" + prefix + "-name"), bodyEl = $("#" + prefix + "-body");
+    var trap = $("#" + prefix + "-site"), status = $("#" + prefix + "-status"), send = $("#" + prefix + "-send");
+    nameEl.value = TAC.savedName();
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (trap.value) return;                         // robot điền ô bẫy thì bỏ qua
+      var tg = getTarget();
+      if (!tg) return;
+      send.disabled = true;
+      status.textContent = "Đang gửi…";
+      status.className = "cstatus ok";
+      TAC.post({ name: nameEl.value, body: bodyEl.value, s: tg.s, c: tg.c, p: tg.p }).then(function () {
+        bodyEl.value = "";
+        status.textContent = "Đã gửi, cảm ơn bạn!";
+        status.className = "cstatus ok";
+      }).catch(function (err) {
+        status.textContent = err.message;
+        status.className = "cstatus";
+      }).then(function () { send.disabled = false; });
+    });
+  }
+
+  function renderParaList() {
+    renderList($("#pm-list"), allComments.filter(function (c) { return c.p === activePara; }),
+      "Chưa có bình luận nào cho đoạn này.");
+  }
+
+  function refreshComments() {
+    var chap = allComments.filter(function (c) { return c.p === null; });
+    renderList($("#cc-list"), chap, "Chưa có bình luận nào cho chương này.");
+    $("#cc-count").textContent = chap.length ? "(" + chap.length + ")" : "";
+    var counts = {};
+    allComments.forEach(function (c) { if (c.p !== null) counts[c.p] = (counts[c.p] || 0) + 1; });
+    if (shadow) {
+      Array.prototype.forEach.call(shadow.querySelectorAll(".pc"), function (b) {
+        var n = counts[parseInt(b.getAttribute("data-i"), 10)] || 0;
+        b.textContent = n ? "💬 " + n : "💬";
+        b.classList.toggle("has", n > 0);
+      });
+    }
+    if (activePara !== null) renderParaList();
+  }
+
+  function openPara(i) {
+    activePara = i;
+    $("#pm-title").textContent = "Bình luận đoạn " + (i + 1);
+    var q = paraTexts[i] || "";
+    $("#pm-quote").textContent = q.length > 90 ? q.slice(0, 90) + "…" : q;
+    $("#pm-status").textContent = "";
+    renderParaList();
+    $("#pmodal").hidden = false;
+    setTimeout(function () { $("#pm-body").focus(); }, 50);
+  }
+  function closePara() { $("#pmodal").hidden = true; activePara = null; }
+
+  function jumpToPara(i) {
+    var el = shadow && shadow.querySelector('.p[data-i="' + i + '"]');
+    if (el) {
+      el.scrollIntoView({ block: "center" });
+      el.classList.add("flash");
+      setTimeout(function () { el.classList.remove("flash"); }, 2500);
+    }
+    openPara(i);
+  }
+
+  function startChapterComments() {
+    if (!commentsOn) return;
+    $("#chapter-comments").hidden = false;
+    $("#para-hint").hidden = false;
+    TAC.watchChapter(STORY, CHAPTER, function (list) { allComments = list; refreshComments(); },
+      function () { allComments = []; refreshComments(); });
+  }
+
+  if (window.TAC) {
+    wireForm("cc", function () { return { s: STORY, c: CHAPTER }; });
+    wireForm("pm", function () { return activePara === null ? null : { s: STORY, c: CHAPTER, p: activePara }; });
+    $("#pm-close").addEventListener("click", closePara);
+    $("#pmodal").addEventListener("click", function (e) { if (e.target === this) closePara(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePara(); });
   }
 
   /* ---------- chống sao chép ---------- */
@@ -274,12 +494,15 @@
       }
     }
   });
+  function inField(e) {
+    return e.target && e.target.closest && e.target.closest("input,textarea");
+  }
   ["cut", "contextmenu", "dragstart"].forEach(function (ev) {
-    document.addEventListener(ev, function (e) { e.preventDefault(); });
+    document.addEventListener(ev, function (e) { if (!inField(e)) e.preventDefault(); });
   });
   document.addEventListener("keydown", function (e) {
     var k = (e.key || "").toLowerCase();
-    if ((e.ctrlKey || e.metaKey) && (k === "x" || k === "s" || k === "u" || k === "p")) e.preventDefault();
+    if (!inField(e) && (e.ctrlKey || e.metaKey) && (k === "x" || k === "s" || k === "u" || k === "p")) e.preventDefault();
     if (e.key === "F12") e.preventDefault();
   });
 

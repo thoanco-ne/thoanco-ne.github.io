@@ -132,15 +132,30 @@
     </div>
   </div>
 
-  <!-- ===== HỘP BÌNH LUẬN (giscus) ===== -->
+  <!-- ===== HỘP VIẾT BÌNH LUẬN (không cần tài khoản) ===== -->
   <div class="modal" id="modal" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-label="Viết bình luận">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cmt-title">
       <button class="modal-close" id="modal-close" type="button" aria-label="Đóng">✕</button>
-      <div id="giscus-holder"></div>
+      <form id="cmt-form" class="cmt-form" autocomplete="off">
+        <h3 id="cmt-title">Viết bình luận</h3>
+        <label for="cmt-name">Tên của bạn</label>
+        <input id="cmt-name" type="text" maxlength="30" placeholder="Khách qua đường">
+        <label for="cmt-body">Bình luận</label>
+        <textarea id="cmt-body" maxlength="500" rows="4" placeholder="Viết gì đó cho thỏ nhé…"></textarea>
+        <!-- ô bẫy cho robot, người thật không thấy -->
+        <input id="cmt-site" class="cmt-hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="cmt-status" id="cmt-status" role="status"></p>
+        <button class="btn-comment" id="cmt-send" type="submit">Gửi bình luận</button>
+      </form>
     </div>
   </div>
 
   <noscript><p style="text-align:center">Trang cần bật JavaScript để hiển thị danh sách truyện.</p></noscript>
+    <!-- Firebase (lưu bình luận) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="config.js"></script>
+  <script src="comments-core.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

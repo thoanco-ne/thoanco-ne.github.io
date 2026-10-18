@@ -11,8 +11,8 @@
    ========================================================= */
 const STORIES = [
   {
-    title: "Trầm Kiều", author: "[gì đó]", length: "63 chương", genres: ["[ngược, HE, đổi công]"],
-    cover: "", folder: "tramkieu", status: "ongoing",
+    title: "Truyện Ví Dụ", author: "[Tác giả]", length: "2 chương", genres: ["[Thể loại]"],
+    cover: "", folder: "vi-du", status: "ongoing",
     chapters: [
       { id: "chuong-2", title: "Chương 2: Gặp gỡ", date: "2026-10-18" },
       { id: "chuong-1", title: "Chương 1: Mở đầu", date: "2026-10-17" }
@@ -23,15 +23,22 @@ const STORIES = [
 const CONFIG = {
   maxChapters: 12,          // số chương mới hiển thị
   maxComments: 15,          // số bình luận hiển thị
-  // Điền thông tin giscus để bật nút "Viết bình luận" (xem README.md)
-  giscus: {
-    repo: "",               // ví dụ "tenban/tho-an-co"
-    repoId: "",
-    category: "",           // ví dụ "Bình luận"
-    categoryId: "",
-    term: "Bình luận chung" // mọi bình luận từ nút này nằm chung 1 chủ đề
-  }
+  // Bình luận dùng Firebase (không cần tài khoản). Điền thông tin dự án Firebase của bạn (xem README.md).
+  // Để trống thì khung bình luận chỉ hiện thông báo chưa cấu hình.
+  firebase: {
+    apiKey: "",
+    authDomain: "",
+    databaseURL: "",
+    projectId: "",
+    appId: ""
+  },
+  commentCooldownSeconds: 30   // khoảng cách tối thiểu giữa hai lần gửi của cùng một người
 };
+
+// nếu bạn đã điền Firebase trong CONFIG ở trên thì vẫn dùng được; khuyến nghị điền ở config.js
+if (!(window.TAC_FIREBASE && window.TAC_FIREBASE.apiKey) && CONFIG.firebase && CONFIG.firebase.apiKey) {
+  window.TAC_FIREBASE = CONFIG.firebase;
+}
 
 const $ = (s) => document.querySelector(s);
 
@@ -122,7 +129,24 @@ function renderChapters(stories) {
   });
 }
 
-/* ---------- bình luận (từ comments.json) ---------- */
+/* ---------- bình luận mới (gom từ mọi nơi: trang chủ, chương, đoạn) ---------- */
+// "Truyện B · Chương 2 · đoạn 5": lấy tên từ danh sách truyện và danh sách chương tự động
+function commentWhere(c) {
+  if (!c.s) return "đã bình luận ở trang chủ";
+  const story = STORIES.find((s) => s.folder === c.s);
+  let text = "đã bình luận ở " + (story && story.title ? story.title : c.s);
+  const chap = story && (story.chapters || []).find((x) => x.id === c.c);
+  text += " · " + (chap && chap.title ? chap.title : c.c);
+  if (c.p !== null && c.p !== undefined) text += " · đoạn " + (c.p + 1);
+  return text;
+}
+
+function commentLink(c) {
+  if (!c.s) return "";
+  return "doc.html?story=" + encodeURIComponent(c.s) + "&chapter=" + encodeURIComponent(c.c) +
+    (c.p !== null && c.p !== undefined ? "&p=" + c.p : "");
+}
+
 function renderComments(list) {
   const box = $("#latest-comments");
   box.textContent = "";
@@ -131,65 +155,65 @@ function renderComments(list) {
     return;
   }
   list.slice(0, CONFIG.maxComments).forEach((c) => {
-    const a = el("a", "row cmt");
-    a.href = c.url || "#";
-    if (c.url) { a.target = "_blank"; a.rel = "noopener"; }
-    const ava = document.createElement("img");
-    ava.className = "ava";
-    ava.alt = "";
-    ava.loading = "lazy";
-    if (c.avatar) ava.src = c.avatar;
+    const url = commentLink(c);
+    const row = el(url ? "a" : "div", "row cmt");
+    if (url) row.href = url;
+    const name = c.name || "ẩn danh";
+    const ava = el("div", "ava", Array.from(name)[0] || "?");
     const txt = el("div", "txt");
-    txt.appendChild(el("time", "", timeAgo(c.createdAt)));
-    txt.appendChild(el("b", "", c.author || "ẩn danh"));
+    txt.appendChild(el("time", "", timeAgo(c.t)));
+    txt.appendChild(el("b", "", name));
+    txt.appendChild(el("span", "where", commentWhere(c)));
     txt.appendChild(el("p", "", c.body || ""));
-    a.appendChild(ava);
-    a.appendChild(txt);
-    box.appendChild(a);
+    row.appendChild(ava);
+    row.appendChild(txt);
+    box.appendChild(row);
   });
 }
 
-/* ---------- hộp viết bình luận (giscus) ---------- */
+function startComments() {
+  const ok = TAC.watchRecent(CONFIG.maxComments, renderComments, (err) => {
+    console.error(err);
+    renderComments([]);
+  });
+  if (!ok) {
+    const box = $("#latest-comments");
+    box.textContent = "";
+    box.appendChild(el("p", "muted", "Khung bình luận chưa được cấu hình. Xem hướng dẫn Firebase trong README.md."));
+  }
+}
+
+/* ---------- hộp viết bình luận ở trang chủ ---------- */
 function setupCommentModal() {
   const modal = $("#modal");
-  const holder = $("#giscus-holder");
-  let loaded = false;
+  const form = $("#cmt-form");
+  const status = $("#cmt-status");
+  const send = $("#cmt-send");
+  const nameEl = $("#cmt-name");
+  const bodyEl = $("#cmt-body");
 
-  function open() {
-    modal.hidden = false;
-    if (loaded) return;
-    loaded = true;
-    const g = CONFIG.giscus;
-    if (!g.repo || !g.repoId || !g.categoryId) {
-      holder.appendChild(el("p", "muted",
-        "Hộp bình luận chưa được cấu hình. Mở script.js và điền thông tin giscus (xem hướng dẫn trong README.md)."));
-      return;
-    }
-    const s = document.createElement("script");
-    s.src = "https://giscus.app/client.js";
-    s.async = true;
-    s.crossOrigin = "anonymous";
-    const attrs = {
-      "data-repo": g.repo,
-      "data-repo-id": g.repoId,
-      "data-category": g.category,
-      "data-category-id": g.categoryId,
-      "data-mapping": "specific",
-      "data-term": g.term,
-      "data-reactions-enabled": "1",
-      "data-input-position": "top",
-      "data-theme": "light",
-      "data-lang": "vi"
-    };
-    Object.entries(attrs).forEach(([k, v]) => s.setAttribute(k, v));
-    holder.appendChild(s);
-  }
-  const close = () => { modal.hidden = true; };
+  nameEl.value = TAC.savedName();
+
+  function say(text, ok) { status.textContent = text; status.classList.toggle("ok", !!ok); }
+  function open() { modal.hidden = false; say(""); setTimeout(() => bodyEl.focus(), 50); }
+  function close() { modal.hidden = true; }
 
   $("#btn-comment").addEventListener("click", open);
   $("#modal-close").addEventListener("click", close);
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if ($("#cmt-site").value) return;                    // robot điền ô bẫy thì bỏ qua
+    send.disabled = true;
+    say("Đang gửi…", true);
+    TAC.post({ name: nameEl.value, body: bodyEl.value }).then(() => {
+      bodyEl.value = "";
+      say("Đã gửi, cảm ơn bạn!", true);
+      setTimeout(close, 900);
+    }).catch((err) => say(err.message)).then(() => { send.disabled = false; });
+  });
 }
 
 /* ---------- khởi động ---------- */
@@ -214,11 +238,5 @@ function setupCommentModal() {
     $("#latest-chapters").appendChild(el("p", "muted", msg));
   }
 
-  try {
-    const comments = await loadJSON("data/comments.json");
-    renderComments(Array.isArray(comments) ? comments : []);
-  } catch (err) {
-    console.error(err);
-    renderComments([]);
-  }
+  startComments();
 })();

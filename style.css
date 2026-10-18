@@ -428,3 +428,24 @@ img{max-width:100%}
   .shelf-grid{grid-template-columns:repeat(auto-fill,minmax(98px,1fr))}
   .nav a{padding:4px 12px}
 }
+
+/* ========== FORM BÌNH LUẬN ========== */
+.cmt-form{display:flex;flex-direction:column;gap:6px}
+.cmt-form h3{margin:0 0 4px;font-family:var(--font-hand);font-weight:400;font-size:1.4rem;color:var(--brown)}
+.cmt-form label{font-size:.85rem;color:var(--brown-d)}
+.cmt-form input[type=text],.cmt-form textarea{
+  width:100%;font:inherit;color:var(--text);background:var(--cream);
+  border:2px solid var(--line);border-radius:8px;padding:7px 10px;
+}
+.cmt-form textarea{resize:vertical;min-height:90px}
+.cmt-form input:focus-visible,.cmt-form textarea:focus-visible{outline:3px solid var(--pink-d);outline-offset:1px}
+.cmt-hp{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0}
+.cmt-status{min-height:1.2em;margin:0;font-size:.85rem;color:#a14d4d}
+.cmt-status.ok{color:#4c7a4f}
+.cmt-form .btn-comment{align-self:flex-start;margin-top:2px}
+.cmt-form .btn-comment:disabled{opacity:.6;cursor:default}
+
+/* ========== BÌNH LUẬN GOM TỪ MỌI NƠI ========== */
+.row .where{display:block;font-size:.74rem;color:#a98d84;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmt .ava{display:grid;place-items:center;font-weight:700;font-size:.85rem;color:var(--brown-d);text-transform:uppercase}
+.cmt .txt p{margin-top:2px;overflow-wrap:anywhere}
