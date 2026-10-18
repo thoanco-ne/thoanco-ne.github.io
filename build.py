@@ -126,30 +126,62 @@ def build_chapter_index(story_folders):
     print("Đã tạo data/chapters.json cho:", list(index))
 
 
-CURSOR_MAX = 32   # con trỏ chuột nên tối đa 32x32 px
+# Kích thước tối đa (cạnh dài nhất, px) khi phát hành. Ảnh gốc trong repo giữ nguyên.
+IMG_MAX_DEFAULT = 1000   # bìa, ảnh đại diện, trang trí...: ô hiển thị chỉ vài trăm px nên dư sức nét
+IMG_MAX_FRAME = 900      # khung bọc truyện (khung*.png)
+IMG_MAX_CURSOR = 32      # con trỏ chuột (cursor*.png) phải nhỏ mới hiển thị được
 
 
-def shrink_cursors():
-    """Tự thu nhỏ ảnh con trỏ (images/cursor*.png) về tối đa 32x32 trong bản phát hành.
-    Ảnh gốc trong repo giữ nguyên, bạn tải ảnh to cỡ nào cũng được."""
+def optimize_images():
+    """Tự thu nhỏ và nén ảnh trong images/ khi phát hành, bạn tải ảnh to cỡ nào cũng được."""
     folder = os.path.join(OUTPUT_DIR, "images")
     if not os.path.isdir(folder):
         return
     try:
-        from PIL import Image
+        import io
+        from PIL import Image, ImageOps
     except ImportError:
-        print("Cảnh báo: chưa cài Pillow nên không tự thu nhỏ ảnh con trỏ.")
+        print("Cảnh báo: chưa cài Pillow nên không tự nén ảnh.")
         return
     resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
-    for name in sorted(os.listdir(folder)):
-        if name.lower().startswith("cursor") and name.lower().endswith(".png"):
-            path = os.path.join(folder, name)
-            im = Image.open(path).convert("RGBA")
-            if max(im.size) > CURSOR_MAX:
-                old = im.size
-                im.thumbnail((CURSOR_MAX, CURSOR_MAX), resample)
-                im.save(path)
-                print("Đã thu nhỏ", name, old, "->", im.size)
+    saved = 0
+    for root, _dirs, files in os.walk(folder):
+        for name in sorted(files):
+            low = name.lower()
+            if not low.endswith((".png", ".jpg", ".jpeg", ".webp")):
+                continue
+            path = os.path.join(root, name)
+            try:
+                before = os.path.getsize(path)
+                im = Image.open(path)
+                if getattr(im, "is_animated", False):
+                    continue                      # ảnh động: giữ nguyên
+                fmt = (im.format or "").upper()
+                im = ImageOps.exif_transpose(im)  # ảnh chụp từ điện thoại: xoay đúng chiều
+                limit = IMG_MAX_DEFAULT
+                if low.startswith("cursor"):
+                    limit = IMG_MAX_CURSOR
+                elif low.startswith("khung"):
+                    limit = IMG_MAX_FRAME
+                resized = max(im.size) > limit
+                if resized:
+                    im.thumbnail((limit, limit), resample)
+                buf = io.BytesIO()
+                if fmt == "JPEG":
+                    im.convert("RGB").save(buf, "JPEG", quality=85, optimize=True, progressive=True)
+                elif fmt == "WEBP":
+                    im.save(buf, "WEBP", quality=85)
+                else:
+                    im.save(buf, "PNG", optimize=True)
+                after = buf.tell()
+                if resized or after < before:
+                    with open(path, "wb") as f:
+                        f.write(buf.getvalue())
+                    saved += before - after
+                    print("Ảnh", name, ":", before // 1024, "KB ->", after // 1024, "KB", im.size)
+            except Exception as err:
+                print("Bỏ qua ảnh", name, "-", err)
+    print("Đã tiết kiệm khoảng", max(saved, 0) // 1024, "KB ảnh")
 
 
 def main():
@@ -168,7 +200,7 @@ def main():
         if os.path.isdir(folder):
             shutil.copytree(folder, os.path.join(OUTPUT_DIR, folder), dirs_exist_ok=True)
 
-    shrink_cursors()
+    optimize_images()
 
     # Tự quét các thư mục truyện (thư mục nào có file .txt)
     system_folders = {".git", ".github", "fonts", "public", "images", "data",

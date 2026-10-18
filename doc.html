@@ -45,8 +45,9 @@
        Chỉnh 3 số này nếu viền bị cắt, bị bẹp hoặc chữ đè lên hoạ tiết:
        --frame-w       độ dày viền hiển thị (to hơn thì khung dày hơn)
        --frame-gap     khoảng trống giữa viền và chữ
-       --frame-outset  cho hoạ tiết (như cái nơ) tràn ra ngoài mép, ví dụ 12px */
-    #story-card{--frame-w:clamp(34px,9vw,64px);--frame-gap:clamp(4px,2vw,14px);--frame-outset:0px}
+       --frame-outset  cho hoạ tiết (như cái nơ) tràn ra ngoài mép, ví dụ 12px
+       --frame-h       chiều cao cố định của khung (chữ cuộn bên trong), ví dụ 700px */
+    #story-card{--frame-w:clamp(34px,9vw,64px);--frame-gap:clamp(4px,2vw,14px);--frame-outset:0px;--frame-h:clamp(460px,80vh,780px)}
     #story-card.framed{
       border:var(--frame-w) solid transparent;
       border-radius:0;
@@ -69,6 +70,18 @@
     .toc a.current{font-weight:700;background:var(--pink)}
     .muted{color:#a98d84;font-size:.9rem}
     noscript{display:block;padding:20px;text-align:center}
+
+    /* khung cố định kích thước, chữ cuộn bên trong */
+    #story-card{height:var(--frame-h)}
+    #story-scroll{
+      height:100%;overflow-y:auto;overflow-x:hidden;padding-right:8px;
+      scrollbar-width:thin;scrollbar-color:var(--pink-d) transparent;
+    }
+    #story-scroll::-webkit-scrollbar{width:8px}
+    #story-scroll::-webkit-scrollbar-thumb{background:var(--pink-d);border-radius:8px}
+    #story-scroll::-webkit-scrollbar-track{background:transparent}
+    #story-scroll:focus-visible{outline:2px solid var(--pink-d);outline-offset:2px;border-radius:4px}
+    @media (max-width:560px){#story-card{--frame-h:clamp(440px,76vh,700px)}}
 
     /* ===== BÌNH LUẬN CHƯƠNG + TỪNG ĐOẠN ===== */
     input,textarea{-webkit-user-select:text;user-select:text}
@@ -126,9 +139,12 @@
   <!-- Chế độ đọc chương -->
   <section id="reader" hidden>
     <div id="story-card">
-      <h1 id="chapter-title"></h1>
-      <!-- Nội dung chương được nạp vào "closed shadow root" ở đây -->
-      <div id="secure-shadow-root"></div>
+      <!-- vùng cuộn: khung cố định kích thước, chữ cuộn bên trong -->
+      <div id="story-scroll" tabindex="0" role="region" aria-label="Nội dung chương, cuộn để đọc">
+        <h1 id="chapter-title"></h1>
+        <!-- Nội dung chương được nạp vào "closed shadow root" ở đây -->
+        <div id="secure-shadow-root"></div>
+      </div>
     </div>
     <div class="nav">
       <a class="btn" id="btn-prev" href="#">← chương trước</a>
