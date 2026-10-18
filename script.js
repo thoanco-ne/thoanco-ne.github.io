@@ -11,11 +11,11 @@
    ========================================================= */
 const STORIES = [
   {
-    title: "Trầm kiều", author: "[Tác giả]", length: "63 chương", genres: ["đam mỹ, ngược, thế thân, HE"],
-    cover: "", folder: "tramkieu", status: "ongoing",
+    title: "Truyện Ví Dụ", author: "[Tác giả]", length: "2 chương", genres: ["[Thể loại]"],
+    cover: "", folder: "vi-du", status: "ongoing",
     chapters: [
-      { id: "c2", title: "Chương 2: Gặp gỡ", date: "2026-10-18" },
-      { id: "c1", title: "Chương 1: Mở đầu", date: "2026-10-17" }
+      { id: "chuong-2", title: "Chương 2: Gặp gỡ", date: "2026-10-18" },
+      { id: "chuong-1", title: "Chương 1: Mở đầu", date: "2026-10-17" }
     ]
   }
 ];
@@ -198,6 +198,11 @@ function setupCommentModal() {
 
   try {
     const stories = STORIES;
+    // chương mới tự cập nhật: build.py tạo data/chapters.json từ list.txt của từng truyện
+    try {
+      const auto = await loadJSON("data/chapters.json");
+      stories.forEach((s) => { if (s.folder && Array.isArray(auto[s.folder])) s.chapters = auto[s.folder]; });
+    } catch (err) { /* chưa có thì dùng danh sách chương ghi tay trong STORIES */ }
     renderShelf($("#list-done"), $("#count-done"), stories.filter((s) => s.status === "done"));
     renderShelf($("#list-ongoing"), $("#count-ongoing"), stories.filter((s) => s.status !== "done"));
     renderChapters(stories);

@@ -10,9 +10,12 @@ Việc script làm:
 
 Bạn có thể chạy thử trên máy:  pip install fonttools brotli  &&  python build.py
 """
+import datetime
+import json
 import os
 import random
 import shutil
+import subprocess
 import unicodedata
 
 from fontTools.ttLib import TTFont
@@ -32,7 +35,7 @@ rng = random.Random(SEED)
 VIET_LOWER = "aàáảãạăằắẳẵặâầấẩẫậeèéẻẽẹêềếểễệiìíỉĩịoòóỏõọôồốổỗộơờớởỡợuùúủũụưừứửữựyỳýỷỹỵđ"
 VIET_UPPER = "AÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬEÈÉẺẼẸÊỀẾỂỄỆIÌÍỈĨỊOÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢUÙÚỦŨỤƯỪỨỬỮỰYỲÝỶỸỴĐ"
 VIET_CHARS = VIET_LOWER + VIET_UPPER
-ZERO_WIDTH_CHARS = ["‌", "​", "﻿"]
+ZERO_WIDTH_CHARS = ["\u200c", "\ufeff", "\u2060"]   # không dùng \u200b vì nó tạo chỗ ngắt dòng giữa từ
 
 
 def generate_secure_font(input_path, output_path):
@@ -85,6 +88,44 @@ def obfuscate_text(text, char_map):
     return "\n".join(out_lines)
 
 
+def chapter_date(path):
+    """Ngày chương được thêm vào repo (lấy từ lịch sử git). Không có git thì dùng giờ sửa file."""
+    try:
+        out = subprocess.run(["git", "log", "--diff-filter=A", "--format=%cI", "--", path],
+                             capture_output=True, text=True, check=True).stdout.split()
+        if out:
+            return out[-1]
+    except Exception:
+        pass
+    ts = os.path.getmtime(path)
+    return datetime.datetime.fromtimestamp(ts, datetime.timezone.utc).isoformat()
+
+
+def build_chapter_index(story_folders):
+    """Đọc list.txt của từng truyện và ghi data/chapters.json để khung 'Chương mới' tự cập nhật."""
+    index = {}
+    for folder in story_folders:
+        list_path = os.path.join(folder, "list.txt")
+        if not os.path.isfile(list_path):
+            continue
+        items = []
+        with open(list_path, "r", encoding="utf-8") as f:
+            for line in f.read().replace("\r", "").split("\n"):
+                line = line.strip()
+                if not line or line.startswith("# ") or ":" not in line:
+                    continue
+                cid, title = line.split(":", 1)
+                cid, title = cid.strip(), title.strip()
+                chap_file = os.path.join(folder, cid + ".txt")
+                if os.path.isfile(chap_file):
+                    items.append({"id": cid, "title": title, "date": chapter_date(chap_file)})
+        index[folder] = items
+    os.makedirs(os.path.join(OUTPUT_DIR, "data"), exist_ok=True)
+    with open(os.path.join(OUTPUT_DIR, "data", "chapters.json"), "w", encoding="utf-8") as f:
+        json.dump(index, f, ensure_ascii=False)
+    print("Đã tạo data/chapters.json cho:", list(index))
+
+
 def main():
     if os.path.exists(OUTPUT_DIR):
         shutil.rmtree(OUTPUT_DIR)
@@ -129,6 +170,8 @@ def main():
             raw = unicodedata.normalize("NFC", raw)   # gom dấu về dạng dựng sẵn
             with open(dst, "w", encoding="utf-8") as f:
                 f.write(obfuscate_text(raw, char_map))
+
+    build_chapter_index(story_folders)
 
     # Báo Pages không dùng Jekyll
     open(os.path.join(OUTPUT_DIR, ".nojekyll"), "w").close()

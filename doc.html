@@ -25,7 +25,7 @@
       -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
     }
     a{color:inherit}
-    .wrap{max-width:760px;margin:0 auto}
+    .wrap{max-width:760px;margin:0 auto;padding-bottom:84px}  /* chừa chỗ để nút ▲▼ không đè nút chương */
     .top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:14px 0}
     .btn{
       font-family:var(--font-hand);font-size:15px;text-decoration:none;cursor:pointer;
@@ -39,6 +39,25 @@
     #story-card{
       background:var(--card);border:2px solid var(--line);border-radius:12px;
       padding:clamp(14px,4vw,28px);margin:10px 0;
+    }
+    /* ===== KHUNG PNG BỌC QUANH TRUYỆN =====
+       Ảnh khung: images/khung.png (đổi tên ảnh ở FRAME_SRC trong phần script bên dưới).
+       Chỉnh 3 số này nếu viền bị cắt, bị bẹp hoặc chữ đè lên hoạ tiết:
+       --frame-w       độ dày viền hiển thị (to hơn thì khung dày hơn)
+       --frame-gap     khoảng trống giữa viền và chữ
+       --frame-outset  cho hoạ tiết (như cái nơ) tràn ra ngoài mép, ví dụ 12px */
+    #story-card{--frame-w:clamp(34px,9vw,64px);--frame-gap:clamp(4px,2vw,14px);--frame-outset:0px}
+    #story-card.framed{
+      border:var(--frame-w) solid transparent;
+      border-radius:0;
+      border-image-source:var(--frame-url);
+      border-image-slice:var(--frame-slice);
+      border-image-width:var(--frame-w);
+      border-image-outset:var(--frame-outset);
+      border-image-repeat:stretch;
+      background-clip:padding-box;
+      padding:var(--frame-gap);
+      margin:calc(10px + var(--frame-outset)) var(--frame-outset);
     }
     #chapter-title{margin:0 0 14px;font-family:var(--font-hand);font-weight:400;font-size:clamp(22px,5vw,30px);color:var(--brown)}
     body.dark #chapter-title{color:#e3a1a1}
@@ -171,7 +190,8 @@
       if (!r.ok) throw new Error("Chương này chưa có.");
       return r.text();
     }).then(function (plain) {
-      var blocks = plain.replace(/\r/g, "").split(/\n\s*\n/);
+      // mỗi dòng là một đoạn (file chương xuống dòng một lần hay hai lần đều được)
+      var blocks = plain.replace(/\r/g, "").split(/\n+/);
       var title = "";
       var paras = [];
       blocks.forEach(function (b) {
@@ -263,7 +283,26 @@
     if (e.key === "F12") e.preventDefault();
   });
 
+  /* ---------- khung PNG bọc truyện ---------- */
+  var FRAME_SRC = "images/khung.png";   // đổi tên nếu ảnh khung của bạn tên khác
+  var FRAME_SLICE = "auto";             // "auto" hoặc một số (px trên ảnh gốc), xem README
+  function setupFrame() {
+    var img = new Image();
+    img.onload = function () {
+      var card = $("#story-card");
+      if (!card || !img.naturalWidth) return;
+      var slice = FRAME_SLICE === "auto"
+        ? Math.round(Math.min(img.naturalWidth, img.naturalHeight) * 0.25)
+        : parseInt(FRAME_SLICE, 10);
+      card.style.setProperty("--frame-url", 'url("' + FRAME_SRC + '")');
+      card.style.setProperty("--frame-slice", String(slice));
+      card.classList.add("framed");     // không có ảnh thì giữ khung mặc định
+    };
+    img.src = FRAME_SRC;
+  }
+
   /* ---------- khởi động ---------- */
+  setupFrame();
   if (!STORY || !SAFE.test(STORY) || (CHAPTER && !SAFE.test(CHAPTER))) {
     say("Đường dẫn chưa đúng. Hãy quay lại trang chủ và chọn truyện.");
     return;
