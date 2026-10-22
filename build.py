@@ -128,7 +128,7 @@ def build_chapter_index(story_folders):
 
 # Kích thước tối đa (cạnh dài nhất, px) khi phát hành. Ảnh gốc trong repo giữ nguyên.
 IMG_MAX_DEFAULT = 1000   # bìa, ảnh đại diện, trang trí...: ô hiển thị chỉ vài trăm px nên dư sức nét
-IMG_MAX_FRAME = 900      # khung bọc truyện (khung*.png)
+IMG_MAX_FRAME = 1500     # khung bọc truyện (khung*.png)
 IMG_MAX_CURSOR = 32      # con trỏ chuột (cursor*.png) phải nhỏ mới hiển thị được
 
 

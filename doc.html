@@ -71,6 +71,18 @@
     .muted{color:#a98d84;font-size:.9rem}
     noscript{display:block;padding:20px;text-align:center}
 
+    /* Kiểu "nguyên tấm": ảnh khung (A4 dọc) phủ vừa khít cả trang, chữ nằm trong phần giữa.
+       --pad-x / --pad-y = độ dày viền của ảnh khung (phần chữ không được đè lên).
+       Chữ đè lên hoạ tiết thì tăng 2 số này, thấy viền trống quá thì giảm. */
+    #story-card{--pad-x:9%;--pad-y:6.5%}
+    #story-card.framed-whole{
+      border:0;border-radius:0;background:var(--frame-url) center/100% 100% no-repeat;
+      padding:var(--pad-y) var(--pad-x);
+    }
+    #story-card.framed-whole #story-scroll{
+      background:var(--card);border-radius:6px;padding:12px 12px 12px 14px;
+    }
+
     /* khung cố định kích thước, chữ cuộn bên trong */
     #story-card{--card-w:680px;width:min(100%,var(--card-w));aspect-ratio:210/297;margin-left:auto;margin-right:auto;box-sizing:border-box}
     #story-scroll{
@@ -515,6 +527,7 @@
 
   /* ---------- khung PNG bọc truyện ---------- */
   var FRAME_SRC = "images/khung.png";   // đổi tên nếu ảnh khung của bạn tên khác
+  var FRAME_MODE = "whole";             // "whole" = ảnh khung A4 dọc phủ nguyên tấm; "slice" = kéo giãn viền
   var FRAME_SLICE = "auto";             // "auto" hoặc một số (px trên ảnh gốc), xem README
   function setupFrame() {
     var img = new Image();
@@ -525,8 +538,12 @@
         ? Math.round(Math.min(img.naturalWidth, img.naturalHeight) * 0.25)
         : parseInt(FRAME_SLICE, 10);
       card.style.setProperty("--frame-url", 'url("' + FRAME_SRC + '")');
-      card.style.setProperty("--frame-slice", String(slice));
-      card.classList.add("framed");     // không có ảnh thì giữ khung mặc định
+      if (FRAME_MODE === "whole") {
+        card.classList.add("framed-whole");   // ảnh khung phủ nguyên tấm
+      } else {
+        card.style.setProperty("--frame-slice", String(slice));
+        card.classList.add("framed");         // kéo giãn viền (cho khung hoạ tiết lặp)
+      }
     };
     img.src = FRAME_SRC;
   }
