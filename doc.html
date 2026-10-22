@@ -46,8 +46,8 @@
        --frame-w       độ dày viền hiển thị (to hơn thì khung dày hơn)
        --frame-gap     khoảng trống giữa viền và chữ
        --frame-outset  cho hoạ tiết (như cái nơ) tràn ra ngoài mép, ví dụ 12px
-       --frame-h       chiều cao cố định của khung (chữ cuộn bên trong), ví dụ 700px */
-    #story-card{--frame-w:clamp(34px,9vw,64px);--frame-gap:clamp(4px,2vw,14px);--frame-outset:0px;--frame-h:clamp(460px,80vh,780px)}
+       khung có tỉ lệ giấy A4 (rộng:cao = 210:297); đổi --card-w để khung to/nhỏ hơn */
+    #story-card{--frame-w:clamp(34px,9vw,64px);--frame-gap:clamp(4px,2vw,14px);--frame-outset:0px}
     #story-card.framed{
       border:var(--frame-w) solid transparent;
       border-radius:0;
@@ -58,7 +58,7 @@
       border-image-repeat:stretch;
       background-clip:padding-box;
       padding:var(--frame-gap);
-      margin:calc(10px + var(--frame-outset)) var(--frame-outset);
+      margin:calc(10px + var(--frame-outset)) auto;
     }
     #chapter-title{margin:0 0 14px;font-family:var(--font-hand);font-weight:400;font-size:clamp(22px,5vw,30px);color:var(--brown)}
     body.dark #chapter-title{color:#e3a1a1}
@@ -72,7 +72,7 @@
     noscript{display:block;padding:20px;text-align:center}
 
     /* khung cố định kích thước, chữ cuộn bên trong */
-    #story-card{height:var(--frame-h)}
+    #story-card{--card-w:680px;width:min(100%,var(--card-w));aspect-ratio:210/297;margin-left:auto;margin-right:auto;box-sizing:border-box}
     #story-scroll{
       height:100%;overflow-y:auto;overflow-x:hidden;padding-right:8px;
       scrollbar-width:thin;scrollbar-color:var(--pink-d) transparent;
@@ -81,7 +81,6 @@
     #story-scroll::-webkit-scrollbar-thumb{background:var(--pink-d);border-radius:8px}
     #story-scroll::-webkit-scrollbar-track{background:transparent}
     #story-scroll:focus-visible{outline:2px solid var(--pink-d);outline-offset:2px;border-radius:4px}
-    @media (max-width:560px){#story-card{--frame-h:clamp(440px,76vh,700px)}}
 
     /* ===== BÌNH LUẬN CHƯƠNG + TỪNG ĐOẠN ===== */
     input,textarea{-webkit-user-select:text;user-select:text}
@@ -306,7 +305,7 @@
       var style = document.createElement("style");
       style.textContent =
         "#story-content{font-family:'SecuredFont',serif;line-height:1.9;color:inherit;font-size:" + fontSize + "px}" +
-        ".p{margin:0 0 1rem;white-space:pre-line;word-break:break-word}" + PC_CSS + (commentsOn ? "" : ".pc{display:none}");
+        ".p{margin:0 0 1rem;white-space:pre-line;word-break:break-word}" + PC_CSS;
       shadow.appendChild(style);
 
       var content = document.createElement("div");
@@ -321,7 +320,7 @@
         b.className = "pc";
         b.setAttribute("data-i", String(i));
         b.setAttribute("aria-label", "Bình luận đoạn " + (i + 1));
-        b.textContent = "💬";
+        b.textContent = "";
         b.addEventListener("click", function () { openPara(i); });
         d.appendChild(document.createTextNode(" "));
         d.appendChild(b);
@@ -352,10 +351,11 @@
   var allComments = [];
   var activePara = null;
   var PC_CSS =
-    ".pc{margin-left:.3em;border:0;background:none;cursor:pointer;font:inherit;font-family:system-ui,sans-serif;font-size:.65em;" +
-    "line-height:1;opacity:.35;padding:.15em .3em;color:inherit;vertical-align:middle;-webkit-user-select:none;user-select:none}" +
+    ".pc{display:inline-flex;align-items:center;gap:.25em;margin-left:.4em;border:0;background:none;cursor:pointer;font-family:system-ui,sans-serif;font-size:.7em;font-weight:700;line-height:1;opacity:.75;padding:.2em .3em;color:#5a403a;vertical-align:middle;-webkit-user-select:none;user-select:none}" +
+    ".pc::before{content:\"\";display:inline-block;width:1.5em;height:1.3em;background:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M4 2h16a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-8l-6 5v-5H4a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3z' fill='%23e8a0a8' stroke='%237d5d52' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='7' cy='9.5' r='1.4' fill='%23fff'/%3E%3Ccircle cx='12' cy='9.5' r='1.4' fill='%23fff'/%3E%3Ccircle cx='17' cy='9.5' r='1.4' fill='%23fff'/%3E%3C/svg%3E\") no-repeat center/contain}" +
+    ".pc[data-n]::after{content:attr(data-n)}" +
     ".pc:hover,.pc:focus-visible{opacity:1}" +
-    ".pc.has{opacity:1;background:#f7d8d8;color:#5a403a;border-radius:999px;padding:.2em .6em;font-weight:700}" +
+    ".pc[data-n]{opacity:1;background:#f7d8d8;border-radius:999px;padding:.2em .6em .2em .4em}" +
     ".p.flash{background:rgba(244,143,177,.25);border-radius:4px;transition:background .6s}";
 
   function ago(ms) {
@@ -428,7 +428,7 @@
     if (shadow) {
       Array.prototype.forEach.call(shadow.querySelectorAll(".pc"), function (b) {
         var n = counts[parseInt(b.getAttribute("data-i"), 10)] || 0;
-        b.textContent = n ? "💬 " + n : "💬";
+        if (n) b.setAttribute("data-n", String(n)); else b.removeAttribute("data-n");
         b.classList.toggle("has", n > 0);
       });
     }
@@ -440,8 +440,9 @@
     $("#pm-title").textContent = "Bình luận đoạn " + (i + 1);
     var q = paraTexts[i] || "";
     $("#pm-quote").textContent = q.length > 90 ? q.slice(0, 90) + "…" : q;
-    $("#pm-status").textContent = "";
-    renderParaList();
+    $("#pm-status").textContent = commentsOn ? "" : "Bình luận chưa được bật. Điền config.js (xem README) để dùng.";
+    $("#pm-form").style.display = commentsOn ? "" : "none";
+    if (commentsOn) renderParaList(); else $("#pm-list").textContent = "";
     $("#pmodal").hidden = false;
     setTimeout(function () { $("#pm-body").focus(); }, 50);
   }
