@@ -315,15 +315,6 @@
         d.className = "p";
         d.setAttribute("data-i", String(i));
         d.appendChild(document.createTextNode(p));   // văn bản thuần: không chèn mã HTML nên an toàn
-        var b = document.createElement("button");
-        b.type = "button";
-        b.className = "pc";
-        b.setAttribute("data-i", String(i));
-        b.setAttribute("aria-label", "Bình luận đoạn " + (i + 1));
-        b.textContent = "";
-        b.addEventListener("click", function () { openPara(i); });
-        d.appendChild(document.createTextNode(" "));
-        d.appendChild(b);
         content.appendChild(d);
       });
       paraTexts = paras;
@@ -461,7 +452,6 @@
   function startChapterComments() {
     if (!commentsOn) return;
     $("#chapter-comments").hidden = false;
-    $("#para-hint").hidden = false;
     TAC.watchChapter(STORY, CHAPTER, function (list) { allComments = list; refreshComments(); },
       function () { allComments = []; refreshComments(); });
   }
