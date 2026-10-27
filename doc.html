@@ -25,7 +25,7 @@
       -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
     }
     a{color:inherit}
-    .wrap{max-width:760px;margin:0 auto;padding-bottom:84px}  /* chừa chỗ để nút ▲▼ không đè nút chương */
+    .wrap{max-width:800px;margin:0 auto;padding-bottom:84px}  /* chừa chỗ để nút ▲▼ không đè nút chương */
     .top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:14px 0}
     .btn{
       font-family:var(--font-body);font-size:14px;text-decoration:none;cursor:pointer;
@@ -39,26 +39,8 @@
       background:var(--card);border:1px solid var(--line);border-radius:12px;
       padding:clamp(14px,4vw,28px);margin:10px 0;
     }
-    /* ===== KHUNG PNG BỌC QUANH TRUYỆN =====
-       Ảnh khung: images/khung.png (đổi tên ảnh ở FRAME_SRC trong phần script bên dưới).
-       Chỉnh 3 số này nếu viền bị cắt, bị bẹp hoặc chữ đè lên hoạ tiết:
-       --frame-w       độ dày viền hiển thị (to hơn thì khung dày hơn)
-       --frame-gap     khoảng trống giữa viền và chữ
-       --frame-outset  cho hoạ tiết (như cái nơ) tràn ra ngoài mép, ví dụ 12px
-       khung có tỉ lệ giấy A4 (rộng:cao = 210:297); đổi --card-w để khung to/nhỏ hơn */
-    #story-card{--frame-w:clamp(34px,9vw,64px);--frame-gap:clamp(4px,2vw,14px);--frame-outset:0px}
-    #story-card.framed{
-      border:var(--frame-w) solid transparent;
-      border-radius:0;
-      border-image-source:var(--frame-url);
-      border-image-slice:var(--frame-slice);
-      border-image-width:var(--frame-w);
-      border-image-outset:var(--frame-outset);
-      border-image-repeat:stretch;
-      background-clip:padding-box;
-      padding:var(--frame-gap);
-      margin:calc(10px + var(--frame-outset)) auto;
-    }
+    #story-card{--pad:clamp(16px,4.5vw,34px)}
+    #story-card{padding:var(--pad)}
     #chapter-title{margin:0 0 14px;font-family:var(--font-head);font-weight:600;font-size:clamp(20px,4.6vw,27px);color:var(--text)}
     .nav{display:flex;justify-content:space-between;gap:8px;margin:12px 0}
     .toc a{
@@ -69,30 +51,7 @@
     .muted{color:var(--text-soft);font-size:.9rem}
     noscript{display:block;padding:20px;text-align:center}
 
-    /* Kiểu "nguyên tấm": ảnh khung (A4 dọc) phủ vừa khít cả trang, chữ nằm trong phần giữa.
-       --pad-x / --pad-y = độ dày viền của ảnh khung (phần chữ không được đè lên).
-       Chữ đè lên hoạ tiết thì tăng 2 số này, thấy viền trống quá thì giảm. */
-    #story-card{--pad-x:9%;--pad-y:6.5%}
-    #story-card.framed-whole{
-      border:0;border-radius:0;background:var(--frame-url) center/100% 100% no-repeat;
-      padding:var(--pad-y) var(--pad-x);
-    }
-    #story-card.framed-whole #story-scroll{
-      background:var(--card);border-radius:6px;padding:12px 12px 12px 14px;
-    }
-
-    /* khung cố định kích thước, chữ cuộn bên trong */
-    #story-card{--card-w:680px;width:min(100%,var(--card-w));aspect-ratio:210/297;margin-left:auto;margin-right:auto;box-sizing:border-box}
-    #story-scroll{
-      height:100%;overflow-y:auto;overflow-x:hidden;padding-right:8px;
-      scrollbar-width:thin;scrollbar-color:var(--pink-d) transparent;
-    }
-    #story-scroll::-webkit-scrollbar{width:8px}
-    #story-scroll::-webkit-scrollbar-thumb{background:var(--pink-d);border-radius:8px}
-    #story-scroll::-webkit-scrollbar-track{background:transparent}
-    #story-scroll:focus-visible{outline:2px solid var(--pink-d);outline-offset:2px;border-radius:4px}
-
-    /* ===== BÌNH LUẬN CHƯƠNG + TỪNG ĐOẠN ===== */
+    /* ===== BÌNH LUẬN CHƯƠNG ===== */
     input,textarea{-webkit-user-select:text;user-select:text}
     .hint{font-size:.85rem;margin:4px 2px 0}
     .cbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
@@ -116,14 +75,52 @@
     .cstatus.ok{color:var(--ok)}
     .csend{align-self:flex-start}
     .csend:disabled{opacity:.6;cursor:default}
-    .pmodal{position:fixed;inset:0;z-index:9500;display:grid;place-items:center;background:rgba(8,10,6,.7);padding:14px}
-    .pmodal[hidden]{display:none}
-    .pcard{position:relative;width:min(560px,100%);max-height:88vh;overflow:auto;background:var(--card);
-      border:1px solid var(--brown);border-radius:14px;padding:34px 16px 16px;color:var(--text)}
-    .pcard h3{margin:0 0 8px;font-family:var(--font-head);font-weight:600;font-size:1.2rem;color:var(--text)}
-    .pquote{font-family:'SecuredFont',serif;font-size:.95rem;margin:0 0 10px;padding:6px 10px;
-      border-left:3px solid var(--pink-d);background:var(--pink);border-radius:4px;overflow-wrap:anywhere}
-    .pclose{position:absolute;right:10px;top:8px;border:0;background:none;font-size:1.3rem;cursor:pointer;color:var(--text-soft)}
+    /* ===== BẢNG BÌNH LUẬN ĐOẠN ===== */
+    .psheet{position:fixed;inset:0;z-index:9500;display:flex;align-items:flex-end;justify-content:center;background:rgba(20,14,10,.55)}
+    .psheet[hidden]{display:none}
+    .ps-box{
+      width:min(600px,100%);max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;
+      background:var(--panel-solid);color:var(--text);border:1px solid var(--line-b);
+      border-radius:18px 18px 0 0;overflow:hidden;
+    }
+    @media (min-width:700px){.psheet{align-items:center}.ps-box{border-radius:18px;max-height:84vh}}
+    .ps-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px 10px;border-bottom:1px solid var(--line)}
+    .ps-head h3{margin:0;font-family:var(--font-head);font-weight:600;font-size:1.05rem}
+    .ps-x{border:1px solid var(--line-b);background:var(--pink);color:var(--text);width:34px;height:34px;border-radius:10px;font-size:1.05rem;cursor:pointer}
+    .ps-x:hover{color:var(--accent)}
+    .ps-body{flex:1;overflow-y:auto;padding:12px 16px;scrollbar-width:thin;scrollbar-color:var(--line-b) transparent}
+    .ps-label{margin:12px 0 6px;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-soft)}
+    .ps-label:first-child{margin-top:0}
+    .ps-react{display:flex;flex-wrap:wrap;gap:8px}
+    .rbtn{
+      display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:.95rem;cursor:pointer;
+      padding:6px 12px;border-radius:999px;border:1px solid var(--line-b);background:var(--pink);color:var(--text);
+    }
+    .rbtn .n{font-size:.82rem;font-weight:600;min-width:1ch}
+    .rbtn:hover{background:var(--panel-solid)}
+    .rbtn.on{background:var(--accent-d);border-color:var(--accent-d);color:#fff}
+    .rbtn:disabled{opacity:.55;cursor:default}
+    .ps-quote{
+      margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--pink);
+      font-family:'SecuredFont',serif;font-size:.95rem;line-height:1.7;overflow-wrap:anywhere;
+      max-height:7.5em;overflow:auto;-webkit-user-select:none;user-select:none;
+    }
+    .ps-note{margin:0;font-size:.85rem;color:var(--text-soft)}
+    .ps-form{padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--panel-solid);display:flex;flex-direction:column;gap:8px}
+    .ps-row{display:flex;gap:8px;align-items:center}
+    .ps-namewrap{flex:1;position:relative;min-width:0}
+    .ps-form input[type=text],.ps-form textarea{
+      width:100%;font:inherit;font-size:.95rem;color:var(--text);background:var(--pink);
+      border:1px solid var(--line-b);border-radius:12px;padding:9px 12px;
+    }
+    .ps-namewrap input{padding-right:48px}
+    .ps-nc{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.7rem;color:var(--text-soft)}
+    .ps-form textarea{resize:none;min-height:44px;max-height:120px}
+    .ps-form input:focus-visible,.ps-form textarea:focus-visible{outline:2px solid var(--pink-d);outline-offset:1px}
+    .ps-send{border:0;border-radius:12px;padding:9px 18px;font:600 .95rem var(--font-body);cursor:pointer;background:var(--accent-d);color:#fff}
+    .ps-send:disabled{opacity:.6;cursor:default}
+    .ps-status{min-height:1.1em;margin:0;font-size:.82rem;color:var(--bad)}
+    .ps-status.ok{color:var(--ok)}
   </style>
 </head>
 <body>
@@ -140,17 +137,13 @@
   </div>
 
   <p class="story-name" id="story-name"></p>
-  <p class="muted hint" id="para-hint" hidden>Chạm vào biểu tượng 💬 ở cuối mỗi đoạn để bình luận riêng cho đoạn đó.</p>
 
   <!-- Chế độ đọc chương -->
   <section id="reader" hidden>
     <div id="story-card">
-      <!-- vùng cuộn: khung cố định kích thước, chữ cuộn bên trong -->
-      <div id="story-scroll" tabindex="0" role="region" aria-label="Nội dung chương, cuộn để đọc">
-        <h1 id="chapter-title"></h1>
-        <!-- Nội dung chương được nạp vào "closed shadow root" ở đây -->
-        <div id="secure-shadow-root"></div>
-      </div>
+      <h1 id="chapter-title"></h1>
+      <!-- Nội dung chương được nạp vào "closed shadow root" ở đây -->
+      <div id="secure-shadow-root"></div>
     </div>
     <div class="nav">
       <a class="btn" id="btn-prev" href="#">← chương trước</a>
@@ -178,21 +171,32 @@
     <div id="story-card-toc" class="toc" style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 6px"></div>
   </section>
 
-  <!-- Bình luận từng đoạn -->
-  <div class="pmodal" id="pmodal" hidden>
-    <div class="pcard" role="dialog" aria-modal="true" aria-labelledby="pm-title">
-      <button class="pclose" id="pm-close" type="button" aria-label="Đóng">✕</button>
-      <h3 id="pm-title">Bình luận đoạn</h3>
-      <p class="pquote" id="pm-quote"></p>
-      <div class="clist" id="pm-list"></div>
-      <form class="cform" id="pm-form" autocomplete="off">
-        <label for="pm-name">Tên của bạn</label>
-        <input id="pm-name" type="text" maxlength="30" placeholder="Khách qua đường">
-        <label for="pm-body">Bình luận</label>
-        <textarea id="pm-body" maxlength="500" rows="3" placeholder="Viết gì đó về đoạn này…"></textarea>
-        <input id="pm-site" class="chp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <p class="cstatus" id="pm-status" role="status"></p>
-        <button class="btn csend" id="pm-send" type="submit">Gửi bình luận</button>
+  <!-- Bảng bình luận và cảm xúc cho từng đoạn -->
+  <div class="psheet" id="psheet" hidden>
+    <div class="ps-box" role="dialog" aria-modal="true" aria-labelledby="ps-title">
+      <div class="ps-head">
+        <h3 id="ps-title">Đoạn 1</h3>
+        <button class="ps-x" id="ps-close" type="button" aria-label="Đóng">✕</button>
+      </div>
+      <div class="ps-body">
+        <div class="ps-label">Cảm xúc về đoạn này</div>
+        <div class="ps-react" id="ps-react"></div>
+        <div class="ps-label">Đoạn đang bình luận</div>
+        <p class="ps-quote" id="ps-quote"></p>
+        <div class="ps-label" id="ps-count">Bình luận</div>
+        <div id="ps-list"></div>
+      </div>
+      <form class="ps-form" id="ps-form" autocomplete="off">
+        <div class="ps-row">
+          <div class="ps-namewrap">
+            <input id="ps-name" type="text" maxlength="30" placeholder="Tên (không bắt buộc)" aria-label="Tên của bạn">
+            <span class="ps-nc" id="ps-nc">0/30</span>
+          </div>
+          <button class="ps-send" id="ps-send" type="submit">Gửi</button>
+        </div>
+        <textarea id="ps-body" maxlength="500" rows="2" placeholder="Viết bình luận…" aria-label="Bình luận"></textarea>
+        <input id="ps-site" class="chp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="ps-status" id="ps-status" role="status"></p>
       </form>
     </div>
   </div>
@@ -305,7 +309,7 @@
       var style = document.createElement("style");
       style.textContent =
         "#story-content{font-family:'SecuredFont',serif;line-height:1.9;color:inherit;font-size:" + fontSize + "px}" +
-        ".p{margin:0 0 1rem;white-space:pre-line;word-break:break-word}" + PC_CSS;
+        ".p{margin:0 0 .25rem;white-space:pre-line;word-break:break-word}" + PC_CSS;
       shadow.appendChild(style);
 
       var content = document.createElement("div");
@@ -316,8 +320,22 @@
         d.setAttribute("data-i", String(i));
         d.appendChild(document.createTextNode(p));   // văn bản thuần: không chèn mã HTML nên an toàn
         content.appendChild(d);
+        var bar = document.createElement("div");
+        bar.className = "pbar";
+        var rx = document.createElement("span");
+        rx.className = "rx";
+        rx.setAttribute("data-i", String(i));
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "pc";
+        b.setAttribute("data-i", String(i));
+        b.setAttribute("aria-label", "Bình luận và cảm xúc đoạn " + (i + 1));
+        b.textContent = "+";
+        b.addEventListener("click", function () { openPara(i); });
+        bar.appendChild(rx);
+        bar.appendChild(b);
+        content.appendChild(bar);
       });
-      paraTexts = paras;
       shadow.appendChild(content);
 
       $("#reader").hidden = false;
@@ -326,10 +344,11 @@
       var prev = $("#btn-prev"), next = $("#btn-next");
       if (idx > 0) { prev.href = link(chapters[idx - 1].id); } else { prev.setAttribute("aria-disabled", "true"); }
       if (idx >= 0 && idx < chapters.length - 1) { next.href = link(chapters[idx + 1].id); } else { next.setAttribute("aria-disabled", "true"); }
+      paraTexts = paras;
       startChapterComments();
       var jump = parseInt(params.get("p"), 10);
       if (!isNaN(jump) && jump >= 0 && jump < paras.length) {
-        setTimeout(function () { jumpToPara(jump); }, 150);
+        setTimeout(function () { jumpToPara(jump); }, 200);
       } else {
         window.scrollTo(0, 0);
       }
@@ -338,17 +357,7 @@
 
   /* ---------- bình luận chương và từng đoạn ---------- */
   var commentsOn = false;
-  var paraTexts = [];
   var allComments = [];
-  var activePara = null;
-  var PC_CSS =
-    ".pc{display:inline-flex;align-items:center;gap:.25em;margin-left:.4em;border:0;background:none;cursor:pointer;font-family:system-ui,sans-serif;font-size:.7em;font-weight:700;line-height:1;opacity:.75;padding:.2em .3em;color:#5a403a;vertical-align:middle;-webkit-user-select:none;user-select:none}" +
-    ".pc::before{content:\"\";display:inline-block;width:1.5em;height:1.3em;background:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 22'%3E%3Cpath d='M4 2h16a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-8l-6 5v-5H4a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3z' fill='%23e8a0a8' stroke='%237d5d52' stroke-width='1.6' stroke-linejoin='round'/%3E%3Ccircle cx='7' cy='9.5' r='1.4' fill='%23fff'/%3E%3Ccircle cx='12' cy='9.5' r='1.4' fill='%23fff'/%3E%3Ccircle cx='17' cy='9.5' r='1.4' fill='%23fff'/%3E%3C/svg%3E\") no-repeat center/contain}" +
-    ".pc[data-n]::after{content:attr(data-n)}" +
-    ".pc:hover,.pc:focus-visible{opacity:1}" +
-    ".pc[data-n]{opacity:1;background:#f7d8d8;border-radius:999px;padding:.2em .6em .2em .4em}" +
-    ".p.flash{background:rgba(244,143,177,.25);border-radius:4px;transition:background .6s}";
-
   function ago(ms) {
     var s = Math.max(0, (Date.now() - ms) / 1000);
     if (!ms) return "";
@@ -382,7 +391,8 @@
     });
   }
 
-  function wireForm(prefix, getTarget) {
+  function wireForm(prefix, getTarget, cls) {
+    cls = cls || "cstatus";
     var form = $("#" + prefix + "-form"), nameEl = $("#" + prefix + "-name"), bodyEl = $("#" + prefix + "-body");
     var trap = $("#" + prefix + "-site"), status = $("#" + prefix + "-status"), send = $("#" + prefix + "-send");
     nameEl.value = TAC.savedName();
@@ -393,51 +403,119 @@
       if (!tg) return;
       send.disabled = true;
       status.textContent = "Đang gửi…";
-      status.className = "cstatus ok";
+      status.className = cls + " ok";
       TAC.post({ name: nameEl.value, body: bodyEl.value, s: tg.s, c: tg.c, p: tg.p }).then(function () {
         bodyEl.value = "";
         status.textContent = "Đã gửi, cảm ơn bạn!";
-        status.className = "cstatus ok";
+        status.className = cls + " ok";
       }).catch(function (err) {
         status.textContent = err.message;
-        status.className = "cstatus";
+        status.className = cls;
       }).then(function () { send.disabled = false; });
     });
   }
 
+  var paraTexts = [];
+  var activePara = null;
+  var reactions = {};          // { "3": { tim: 2, khoc: 0, ... } }
+  var RTYPES = [
+    { t: "tim",  e: "❤️", label: "Thả tim" },
+    { t: "khoc", e: "😢", label: "Khóc" },
+    { t: "gian", e: "😡", label: "Tức giận" },
+    { t: "cuoi", e: "😂", label: "Cười chảy nước mắt" }
+  ];
+  var PC_CSS =
+    ".pbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 1.15rem;min-height:26px;-webkit-user-select:none;user-select:none}" +
+    ".rx{font-size:.78rem;letter-spacing:1px;color:inherit;opacity:.85}" +
+    ".pc{font:600 .78rem system-ui,sans-serif;line-height:1;cursor:pointer;padding:.35em .8em;border-radius:999px;" +
+    "border:1px solid var(--line-b,#b4967e);background:var(--panel-2,#ecdccb);color:var(--accent-d,#a8745a)}" +
+    ".pc:hover,.pc:focus-visible{color:var(--accent,#8b5a44);background:var(--panel-solid,#faf3ea)}" +
+    ".pc.has{border-color:var(--accent-d,#a8745a)}" +
+    ".p.flash{background:rgba(168,116,90,.18);border-radius:6px;transition:background .6s}";
+
+  function mineGet() { try { return JSON.parse(localStorage.getItem("tac-react") || "{}"); } catch (e) { return {}; } }
+  function mineSet(m) { try { localStorage.setItem("tac-react", JSON.stringify(m)); } catch (e) {} }
+  function mkey(p, t) { return STORY + "|" + CHAPTER + "|" + p + "|" + t; }
+
+  function refreshBars() {
+    if (!shadow) return;
+    var cc = {};
+    allComments.forEach(function (c) { if (c.p !== null) cc[c.p] = (cc[c.p] || 0) + 1; });
+    Array.prototype.forEach.call(shadow.querySelectorAll(".pc"), function (b) {
+      var i = parseInt(b.getAttribute("data-i"), 10), n = cc[i] || 0;
+      b.textContent = n ? "+" + n : "+";
+      b.classList.toggle("has", n > 0);
+    });
+    Array.prototype.forEach.call(shadow.querySelectorAll(".rx"), function (s) {
+      var i = parseInt(s.getAttribute("data-i"), 10), r = reactions[i] || {};
+      var list = RTYPES.filter(function (x) { return (r[x.t] || 0) > 0; })
+        .sort(function (a, b2) { return (r[b2.t] || 0) - (r[a.t] || 0); }).slice(0, 3);
+      var total = RTYPES.reduce(function (sum, x) { return sum + (r[x.t] || 0); }, 0);
+      s.textContent = list.length ? list.map(function (x) { return x.e; }).join("") + " " + total : "";
+    });
+  }
+
+  function renderReactButtons() {
+    var box = $("#ps-react");
+    box.textContent = "";
+    if (activePara === null) return;
+    var r = reactions[activePara] || {}, mine = mineGet();
+    RTYPES.forEach(function (x) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "rbtn" + (mine[mkey(activePara, x.t)] ? " on" : "");
+      b.setAttribute("data-t", x.t);
+      b.setAttribute("aria-label", x.label);
+      b.setAttribute("aria-pressed", mine[mkey(activePara, x.t)] ? "true" : "false");
+      b.title = x.label;
+      b.disabled = !commentsOn;
+      var e = document.createElement("span"); e.textContent = x.e;
+      var n = document.createElement("span"); n.className = "n"; n.textContent = String(r[x.t] || 0);
+      b.appendChild(e); b.appendChild(n);
+      box.appendChild(b);
+    });
+  }
+
   function renderParaList() {
-    renderList($("#pm-list"), allComments.filter(function (c) { return c.p === activePara; }),
-      "Chưa có bình luận nào cho đoạn này.");
+    var items = allComments.filter(function (c) { return c.p === activePara; });
+    $("#ps-count").textContent = "Bình luận (" + items.length + ")";
+    renderList($("#ps-list"), items, "Chưa có bình luận nào cho đoạn này.");
   }
 
   function refreshComments() {
     var chap = allComments.filter(function (c) { return c.p === null; });
     renderList($("#cc-list"), chap, "Chưa có bình luận nào cho chương này.");
     $("#cc-count").textContent = chap.length ? "(" + chap.length + ")" : "";
-    var counts = {};
-    allComments.forEach(function (c) { if (c.p !== null) counts[c.p] = (counts[c.p] || 0) + 1; });
-    if (shadow) {
-      Array.prototype.forEach.call(shadow.querySelectorAll(".pc"), function (b) {
-        var n = counts[parseInt(b.getAttribute("data-i"), 10)] || 0;
-        if (n) b.setAttribute("data-n", String(n)); else b.removeAttribute("data-n");
-        b.classList.toggle("has", n > 0);
-      });
-    }
+    refreshBars();
     if (activePara !== null) renderParaList();
   }
 
   function openPara(i) {
     activePara = i;
-    $("#pm-title").textContent = "Bình luận đoạn " + (i + 1);
+    $("#ps-title").textContent = "Đoạn " + (i + 1);
     var q = paraTexts[i] || "";
-    $("#pm-quote").textContent = q.length > 90 ? q.slice(0, 90) + "…" : q;
-    $("#pm-status").textContent = commentsOn ? "" : "Bình luận chưa được bật. Điền config.js (xem README) để dùng.";
-    $("#pm-form").style.display = commentsOn ? "" : "none";
-    if (commentsOn) renderParaList(); else $("#pm-list").textContent = "";
-    $("#pmodal").hidden = false;
-    setTimeout(function () { $("#pm-body").focus(); }, 50);
+    $("#ps-quote").textContent = q.length > 180 ? q.slice(0, 180) + "…" : q;
+    $("#ps-form").style.display = commentsOn ? "" : "none";
+    $("#ps-status").textContent = "";
+    renderReactButtons();
+    if (commentsOn) {
+      renderParaList();
+    } else {
+      $("#ps-count").textContent = "Bình luận";
+      var n = document.createElement("p");
+      n.className = "ps-note";
+      n.textContent = "Bình luận và cảm xúc chưa được bật. Điền config.js (xem README) để dùng.";
+      $("#ps-list").textContent = "";
+      $("#ps-list").appendChild(n);
+    }
+    $("#psheet").hidden = false;
+    document.documentElement.style.overflow = "hidden";
   }
-  function closePara() { $("#pmodal").hidden = true; activePara = null; }
+  function closePara() {
+    $("#psheet").hidden = true;
+    activePara = null;
+    document.documentElement.style.overflow = "";
+  }
 
   function jumpToPara(i) {
     var el = shadow && shadow.querySelector('.p[data-i="' + i + '"]');
@@ -449,19 +527,45 @@
     openPara(i);
   }
 
+  function onReact(e) {
+    var b = e.target.closest && e.target.closest(".rbtn");
+    if (!b || activePara === null || !commentsOn) return;
+    var t = b.getAttribute("data-t"), p = activePara, k = mkey(p, t);
+    var mine = mineGet(), delta = mine[k] ? -1 : 1;
+    function apply(d) {
+      var r = reactions[p] = reactions[p] || {};
+      r[t] = Math.max(0, (r[t] || 0) + d);
+      if (d > 0) mine[k] = 1; else delete mine[k];
+      mineSet(mine);
+      refreshBars();
+      if (activePara === p) renderReactButtons();
+    }
+    apply(delta);
+    TAC.react(STORY, CHAPTER, p, t, delta).catch(function () { apply(-delta); });
+  }
+
   function startChapterComments() {
     if (!commentsOn) return;
     $("#chapter-comments").hidden = false;
     TAC.watchChapter(STORY, CHAPTER, function (list) { allComments = list; refreshComments(); },
       function () { allComments = []; refreshComments(); });
+    TAC.watchReactions(STORY, CHAPTER, function (data) {
+      reactions = data || {};
+      refreshBars();
+      if (activePara !== null) renderReactButtons();
+    });
   }
 
   if (window.TAC) {
     wireForm("cc", function () { return { s: STORY, c: CHAPTER }; });
-    wireForm("pm", function () { return activePara === null ? null : { s: STORY, c: CHAPTER, p: activePara }; });
-    $("#pm-close").addEventListener("click", closePara);
-    $("#pmodal").addEventListener("click", function (e) { if (e.target === this) closePara(); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePara(); });
+    wireForm("ps", function () { return activePara === null ? null : { s: STORY, c: CHAPTER, p: activePara }; }, "ps-status");
+    $("#ps-react").addEventListener("click", onReact);
+    $("#ps-close").addEventListener("click", closePara);
+    $("#psheet").addEventListener("click", function (e) { if (e.target === this) closePara(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && activePara !== null) closePara(); });
+    var psName = $("#ps-name"), psNc = $("#ps-nc");
+    function ncount() { psNc.textContent = psName.value.length + "/30"; }
+    psName.addEventListener("input", ncount); ncount();
   }
 
   /* ---------- chống sao chép ---------- */
@@ -513,31 +617,7 @@
     if (e.key === "F12") e.preventDefault();
   });
 
-  /* ---------- khung PNG bọc truyện ---------- */
-  var FRAME_SRC = "images/khung.png";   // đổi tên nếu ảnh khung của bạn tên khác
-  var FRAME_MODE = "whole";             // "whole" = ảnh khung A4 dọc phủ nguyên tấm; "slice" = kéo giãn viền
-  var FRAME_SLICE = "auto";             // "auto" hoặc một số (px trên ảnh gốc), xem README
-  function setupFrame() {
-    var img = new Image();
-    img.onload = function () {
-      var card = $("#story-card");
-      if (!card || !img.naturalWidth) return;
-      var slice = FRAME_SLICE === "auto"
-        ? Math.round(Math.min(img.naturalWidth, img.naturalHeight) * 0.25)
-        : parseInt(FRAME_SLICE, 10);
-      card.style.setProperty("--frame-url", 'url("' + FRAME_SRC + '")');
-      if (FRAME_MODE === "whole") {
-        card.classList.add("framed-whole");   // ảnh khung phủ nguyên tấm
-      } else {
-        card.style.setProperty("--frame-slice", String(slice));
-        card.classList.add("framed");         // kéo giãn viền (cho khung hoạ tiết lặp)
-      }
-    };
-    img.src = FRAME_SRC;
-  }
-
   /* ---------- khởi động ---------- */
-  setupFrame();
   if (!STORY || !SAFE.test(STORY) || (CHAPTER && !SAFE.test(CHAPTER))) {
     say("Đường dẫn chưa đúng. Hãy quay lại trang chủ và chọn truyện.");
     return;

@@ -19,8 +19,8 @@ img{max-width:100%}
   overflow:hidden;
   white-space:nowrap;
   padding:7px 0;
-  font-family:var(--font-script);
-  font-size:clamp(15px,2vw,18px);
+  font-family:var(--font-body);
+  font-size:clamp(13px,1.8vw,15px);
   border-bottom:1px solid var(--line);
 }
 .topbar span{
@@ -79,21 +79,17 @@ img{max-width:100%}
   position:relative;
   padding:26px 14px 18px;
   text-align:center;
-  background:var(--head-img) center/auto 100% repeat-x, var(--panel-2);
+  background:var(--panel-2);
   border-bottom:1px solid var(--line);
 }
 .logo-arch{position:relative;z-index:2;max-width:560px;margin:0 auto}
 .logo-arch h1{
   margin:0;
-  font-family:var(--font-script);
+  font-family:var(--font-head);
   font-weight:600;
-  font-size:clamp(38px,8vw,64px);
+  font-size:clamp(32px,7vw,52px);
   line-height:1.1;
   color:var(--text);
-}
-.logo-arch h1::before,.logo-arch h1::after{
-  content:"✿";font-family:var(--font-body);font-size:.4em;color:var(--accent-d);
-  vertical-align:middle;margin:0 .5em;
 }
 .logo-arch p{
   margin:4px 0 0;
@@ -104,12 +100,6 @@ img{max-width:100%}
   width:64px;height:64px;margin:0 auto 8px;border-radius:50%;display:none;
 }
 .logo-slot:has(img[src]:not([src=""])){display:grid}
-.mascots{
-  position:absolute;right:14px;top:50%;transform:translateY(-50%);z-index:3;
-  display:flex;gap:8px;
-}
-.mascots .slot{width:clamp(38px,8vw,68px);aspect-ratio:1}
-.awning{display:none}
 
 /* ========== MENU ========== */
 .nav{
@@ -136,17 +126,11 @@ img{max-width:100%}
   padding:8px 16px 14px;
 }
 .col-left,.col-right{display:flex;flex-direction:column;gap:12px}
-.lace{height:52px}
-.deco{height:80px}
-.deco2{height:80px}
-.avatar-ring{
-  padding:8px;
-  border-radius:50%;
-  border:1px solid var(--line-b);
-  background:var(--panel-2);
-  width:100%;aspect-ratio:1;
-}
-.avatar{width:100%;height:100%}
+/* ảnh đại diện + khung (khung đè lên ảnh; chỉnh --avatar-inset nếu ảnh bị lọt dưới khung hoặc chừa viền thừa) */
+.avatar-box{position:relative;width:100%;aspect-ratio:1;--avatar-inset:12%}
+.avatar-box .avatar{position:absolute;inset:var(--avatar-inset);padding:0}
+.avatar-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.avatar-frame[hidden]{display:none}
 
 .card-paper{
   background:var(--panel);
@@ -168,9 +152,7 @@ img{max-width:100%}
   font-size:.92rem;
 }
 .hl{color:var(--accent-d);font-weight:600}
-.sep{margin:0;text-align:center;color:var(--accent-d);font-size:.85rem;letter-spacing:2px}
 .quote{font-family:var(--font-head);font-style:italic}
-.strip{height:34px;margin-top:8px}
 
 .links-title{
   font-family:var(--font-script);
@@ -189,9 +171,7 @@ img{max-width:100%}
   color:var(--text);
   transition:background .15s,color .15s;
 }
-.pill::before{content:"🌷  "}
 .pill:hover,.pill:focus-visible{background:var(--panel-solid);color:var(--accent)}
-.pill:hover::before,.pill:focus-visible::before{content:"🦋  "}
 
 /* ========== HAI KỆ TRUYỆN ========== */
 .shelves{
@@ -328,7 +308,7 @@ img{max-width:100%}
 .foot{
   margin:0 16px;
   text-align:center;
-  background:var(--head-img) center/auto 100% repeat-x, var(--panel-2);
+  background:var(--panel-2);
   border:1px solid var(--line);
   border-radius:10px;
   padding:12px;
@@ -365,7 +345,6 @@ img{max-width:100%}
   .col-mid{grid-column:1 / -1;order:-1}
   .shelves{grid-template-columns:1fr}
   .shelf-grid{max-height:480px}
-  .mascots{position:static;transform:none;justify-content:center;margin-top:10px}
 }
 
 /* ========== ĐIỆN THOẠI ========== */

@@ -6,6 +6,7 @@
      - bình luận chương:     { name, body, t, s, c, ck }          s = thư mục truyện, c = mã chương
      - bình luận đoạn:       { name, body, t, s, c, ck, p }       p = số thứ tự đoạn (từ 0)
    Nhờ vậy trang chủ gom được tất cả bình luận mới nhất vào một khung.
+   Cảm xúc (tim, khóc, tức giận, cười) lưu riêng ở nhánh "reactions" dạng số đếm.
    ========================================================= */
 window.TAC = (function () {
   "use strict";
@@ -91,6 +92,23 @@ window.TAC = (function () {
     return true;
   }
 
+  /* cảm xúc về từng đoạn: reactions/{truyện}/{chương}/{đoạn}/{loại} = số lượng */
+  function react(s, c, p, t, delta) {
+    if (!init()) return Promise.reject(new Error("chưa cấu hình"));
+    var ref = db.ref("reactions/" + s + "/" + c + "/" + p + "/" + t);
+    return ref.transaction(function (v) {
+      var n = (v || 0) + (delta > 0 ? 1 : -1);
+      return n < 0 ? 0 : n;
+    });
+  }
+  function watchReactions(s, c, cb, onErr) {
+    if (!init()) return false;
+    db.ref("reactions/" + s + "/" + c)
+      .on("value", function (snap) { cb(snap.val() || {}); }, onErr || function () {});
+    return true;
+  }
+
   return { ready: ready, init: init, post: post, savedName: savedName,
-           watchRecent: watchRecent, watchChapter: watchChapter };
+           watchRecent: watchRecent, watchChapter: watchChapter,
+           react: react, watchReactions: watchReactions };
 })();

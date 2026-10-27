@@ -4,18 +4,53 @@
     ".write": false,
     "comments": {
       ".read": true,
-      ".indexOn": ["t", "ck"],
+      ".indexOn": [
+        "t",
+        "ck"
+      ],
       "$id": {
         ".write": "!data.exists() && newData.exists()",
         ".validate": "newData.hasChildren(['name', 'body', 't']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 30 && newData.child('body').isString() && newData.child('body').val().length >= 1 && newData.child('body').val().length <= 500 && newData.child('t').val() == now && (newData.child('s').exists() == newData.child('c').exists()) && (newData.child('c').exists() == newData.child('ck').exists()) && (!newData.child('p').exists() || newData.child('ck').exists())",
-        "name": { ".validate": true },
-        "body": { ".validate": true },
-        "t": { ".validate": true },
-        "s": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,60}$/)" },
-        "c": { ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,60}$/)" },
-        "ck": { ".validate": "newData.isString() && newData.val() == newData.parent().child('s').val() + '|' + newData.parent().child('c').val()" },
-        "p": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999 && newData.val() % 1 == 0" },
-        "$other": { ".validate": false }
+        "name": {
+          ".validate": true
+        },
+        "body": {
+          ".validate": true
+        },
+        "t": {
+          ".validate": true
+        },
+        "s": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,60}$/)"
+        },
+        "c": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,60}$/)"
+        },
+        "ck": {
+          ".validate": "newData.isString() && newData.val() == newData.parent().child('s').val() + '|' + newData.parent().child('c').val()"
+        },
+        "p": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 9999 && newData.val() % 1 == 0"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "reactions": {
+      ".read": true,
+      "$s": {
+        ".validate": "$s.matches(/^[A-Za-z0-9_-]{1,60}$/)",
+        "$c": {
+          ".validate": "$c.matches(/^[A-Za-z0-9_-]{1,60}$/)",
+          "$p": {
+            ".validate": "$p.matches(/^[0-9]{1,4}$/)",
+            "$t": {
+              ".write": "newData.exists()",
+              ".validate": "($t == 'tim' || $t == 'khoc' || $t == 'gian' || $t == 'cuoi') && newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000 && ((!data.exists() && newData.val() == 1) || (data.exists() && (newData.val() == data.val() + 1 || (data.val() > 0 && newData.val() == data.val() - 1))))"
+            }
+          }
+        }
       }
     }
   }

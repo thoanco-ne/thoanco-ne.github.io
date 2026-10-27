@@ -49,13 +49,13 @@ Mỗi chương mới: thêm một dòng vào `list.txt`, thêm file `.txt`, thê
 Có ba nơi bình luận, tất cả lưu chung một chỗ và được gom vào khung "Bình luận mới" ở trang chủ, kiểu "A đã bình luận ở Truyện B · Chương 2 · đoạn 5: nội dung" (bấm vào sẽ mở đúng chương, đúng đoạn):
 - **Trang chủ**: nút "Viết bình luận".
 - **Cuối mỗi chương**: khung "Bình luận chương".
-- **Từng đoạn**: biểu tượng 💬 ở cuối mỗi đoạn, bấm vào để bình luận riêng cho đoạn đó. Đoạn nào có bình luận thì biểu tượng hiện số lượng.
-Số thứ tự đoạn tính theo thứ tự đoạn trong file chương, nên nếu bạn chèn hoặc xoá đoạn giữa chương thì bình luận đoạn có thể lệch sang đoạn khác.
+- **Từng đoạn**: nút **+** ở cuối mỗi đoạn (hiện **+N** khi đoạn có N bình luận). Bấm vào mở bảng gồm bốn cảm xúc (❤️ 😢 😡 😂), đoạn văn đang bình luận, danh sách bình luận và ô gửi. Cảm xúc là số đếm cộng chung, mỗi người bấm lại để bỏ cảm xúc của mình.
+Số thứ tự đoạn tính theo thứ tự đoạn trong file chương, nên nếu bạn chèn hoặc xoá đoạn giữa chương thì bình luận và cảm xúc của đoạn có thể lệch sang đoạn khác.
 
 Dùng Firebase Realtime Database (gói miễn phí Spark). Chỉ làm một lần:
 1. Vào https://console.firebase.google.com, đăng nhập Google, bấm **Add project**, đặt tên (ví dụ `tho-an-co`), tắt Google Analytics, bấm Create.
 2. Menu trái: **Build → Realtime Database → Create Database**. Chọn vị trí **Singapore**, chọn **Start in locked mode**, bấm Enable.
-3. Tab **Rules**: xoá hết, dán nội dung file `firebase-rules.json`, bấm **Publish**. Luật này chỉ cho thêm bình luận mới (tên 1-30 ký tự, nội dung 1-500 ký tự), không cho sửa hay xoá. Nếu bạn đã dán luật cũ thì dán lại luật mới này để bật bình luận chương và đoạn.
+3. Tab **Rules**: xoá hết, dán nội dung file `firebase-rules.json`, bấm **Publish**. Luật này (đã gồm nhánh `reactions` cho cảm xúc, nếu bạn đã dán luật cũ thì dán lại luật mới) chỉ cho thêm bình luận mới (tên 1-30 ký tự, nội dung 1-500 ký tự), không cho sửa hay xoá. Nếu bạn đã dán luật cũ thì dán lại luật mới này để bật bình luận chương và đoạn.
 4. Bánh răng cạnh "Project Overview" → **Project settings** → kéo xuống **Your apps** → bấm biểu tượng web `</>` → đặt tên app → Register. Copy khối `firebaseConfig`.
 5. Mở file **`config.js`**, điền các giá trị `apiKey`, `authDomain`, `databaseURL`, `projectId`, `appId`. Commit. (Một file này dùng chung cho cả trang chủ và trang đọc truyện.)
 6. Thử: mở web, gửi một bình luận ở trang chủ, rồi vào một chương gửi bình luận chương và bình luận đoạn. Cả ba hiện ngay ở khung "Bình luận mới".
@@ -67,14 +67,18 @@ Xoá bình luận xấu: Firebase Console → Realtime Database → Data → `co
 Giới hạn cần biết: ai cũng gửi được nên có thể bị spam. Web đã có ô bẫy robot, chờ 30 giây giữa hai lần gửi (sửa `COOLDOWN` trong `comments-core.js`) và giới hạn độ dài, nhưng không chặn hoàn toàn được người cố tình. `apiKey` của Firebase trên web vốn công khai, độ an toàn nằm ở Rules.
 Nên dùng một dự án Firebase riêng cho web này, đừng dùng chung với web khác.
 
-## Khung PNG bọc truyện
-Trang đọc truyện dùng ảnh `images/khung.png` làm khung quanh chữ. Thay file này bằng khung của bạn (giữ tên `khung.png`, nền giữa nên trong suốt hoặc để trống). Không có ảnh thì trang dùng khung đơn giản mặc định.
-Nếu khung hiển thị chưa đẹp, chỉnh trong `doc.html`:
-- `--frame-w` (phần CSS gần đầu file): độ dày viền. Viền bị cắt hoạ tiết thì tăng, viền quá dày thì giảm.
-- `--frame-gap`: khoảng trống giữa viền và chữ. Chữ đè lên hoạ tiết thì tăng.
-- `--frame-outset`: cho hoạ tiết như cái nơ tràn ra ngoài mép, thử `12px`.
-- `FRAME_SLICE` (phần script): mặc định `"auto"`. Nếu góc khung bị méo, điền số px là bề rộng của phần góc trên ảnh gốc, ví dụ `"120"`.
-Khung được kéo giãn theo chiều cao chương, nên viền cạnh trên/dưới/trái/phải nên là hoạ tiết lặp được hoặc trơn, không nên có chi tiết lớn ở giữa cạnh.
+## Màu sắc, font, ảnh nền (theme.css)
+Giao diện nâu sữa. Mọi màu, font và ảnh nền của cả web (trang chủ và trang đọc) đều ở file **`theme.css`**, sửa một chỗ là đổi cả web:
+- Ảnh nền: bỏ ảnh vào `images/` rồi bỏ dấu chú thích dòng `--bg-img`.
+- Màu: các biến `--bg`, `--text`, `--accent-d`... ở đầu file. Phần `body.dark` là màu nền tối.
+Người đọc bấm nút 🌓 ở góc phải để đổi nền sáng/tối, trình duyệt nhớ lựa chọn.
+
+## Ảnh đại diện và khung đổi theo dịp lễ (avatar.js)
+- Ảnh của bạn: `images/avatar.png`. Khung thường ngày: `images/frames/mac-dinh.png`.
+- Khung dịp lễ: bỏ ảnh khung (PNG vuông, nền trong suốt, giữa để trống) vào `images/frames/`, rồi thêm một dòng vào danh sách `EVENTS` ở đầu file `avatar.js`. Đến đúng ngày web tự đổi khung, hết ngày tự về khung thường ngày. Thiếu ảnh khung thì tự dùng khung thường ngày.
+- Tết âm lịch, Trung thu đổi ngày mỗi năm nên ghi cả năm, ví dụ `from: "2027-02-04"`. Các dòng có sẵn là ví dụ, bạn kiểm tra lại ngày.
+- Xem thử một khung: thêm `?frame=giang-sinh` vào cuối link trang chủ.
+- Ảnh bị lọt dưới khung hoặc chừa viền thừa thì chỉnh `--avatar-inset` trong `style.css`.
 
 ## Mẹo cho file chương
 Dòng đầu mỗi file chương nên viết dạng `# Chương 1: Tên chương` (có dấu `#` và một khoảng trắng). Dòng này được giữ nguyên chữ thường để làm tiêu đề, và không bị lặp lại trong nội dung.
