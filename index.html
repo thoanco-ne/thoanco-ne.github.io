@@ -1,151 +1,27 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>thỏ ăn cỏ</title>
-  <meta name="description" content="thỏ ăn cỏ - nơi đăng truyện edit">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Các font này đều hỗ trợ đầy đủ tiếng Việt -->
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&family=Dancing+Script:wght@600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="theme.css">
-  <link rel="stylesheet" href="style.css">
-  <!-- Ảnh favicon: bỏ ảnh vào thư mục images/ rồi sửa đường dẫn -->
-  <!-- <link rel="icon" href="images/favicon.png"> -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thỏ Ăn Cỏ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
 </head>
-<body id="top">
-  <script src="age-gate.js"></script>
-  <script src="extras.js"></script>
-
-  <!-- ===== THANH NGANG TRÊN CÙNG ===== -->
-  <div class="topbar" role="note">
-    <span>sở thích niên hạ cún con mắt nước, trâu có bài, trôn có lài và côn trùng</span>
-  </div>
-
-  <div class="frame">
-    <div class="frame-inner">
-
-      <!-- ===== MÁI CHE + LOGO ===== -->
-      <header class="shop-head">
-        <div class="logo-arch">
-          <!-- Muốn dùng ảnh logo: thêm src="images/logo.png" vào thẻ img bên dưới -->
-          <h1>thỏ ăn cỏ</h1>
-          <p>truyện edit · đọc cho vui, thương cho đậm</p>
-        </div>
-      </header>
-
-      <!-- ===== MENU ===== -->
-      <nav class="nav" aria-label="Menu chính">
-        <a href="#top">🏠 trang chủ</a>
-        <a href="#da-lap">🌱 đã lấp hố</a>
-        <a href="#dang-lap">⛏️ đang lấp hố</a>
-        <a href="#cap-nhat">🔔 cập nhật</a>
-      </nav>
-
-      <!-- ===== KHỐI GIỚI THIỆU 3 CỘT ===== -->
-      <main class="board">
-
-        <!-- Cột trái: ảnh đại diện -->
-        <aside class="col-left">
-          <div class="avatar-box">
-            <div class="slot round avatar" data-label="ảnh đại diện"><img id="avatar-photo" src="" alt="Ảnh đại diện"></div>
-            <img id="avatar-frame" class="avatar-frame" alt="" hidden>
-          </div>
-        </aside>
-
-        <!-- Cột giữa: giới thiệu -->
-        <section class="col-mid card-paper" id="gioi-thieu">
-          <h2 class="script-title">Giới thiệu</h2>
-          <p class="line">Bạn có thể gọi mình là <b class="hl">[Tên gọi 1]</b> hoặc <b class="hl">[Tên gọi 2]</b>, cứ thân mật nha.</p>
-          <p class="line">[Tuổi] | [Chiều cao] | [Giới tính / xu hướng] | [Nghề nghiệp] | [Sở thích]</p>
-          <p class="line">Web đăng truyện edit, ai thích thì ghé đọc. Truyện thuộc về tác giả gốc, bản edit chỉ để chia sẻ phi thương mại.</p>
-          <p class="line quote">“[Câu nói / bài hát yêu thích của bạn]” <span class="hl">- [Nguồn]</span></p>
-        </section>
-
-        <!-- Cột phải: liên kết -->
-        <aside class="col-right">
-          <div class="links-title">links</div>
-          <a class="pill" href="#" target="_blank" rel="noopener">Facebook</a>
-          <a class="pill" href="#" target="_blank" rel="noopener">Tiktok</a>
-          <a class="pill" href="#" target="_blank" rel="noopener">Discord</a>
-          <a class="pill" href="#" target="_blank" rel="noopener">Wattpad</a>
-        </aside>
-      </main>
-
-      <!-- ===== HAI MỤC TRUYỆN ===== -->
-      <section class="shelves">
-        <div class="shelf" id="da-lap">
-          <h2 class="ribbon">🌱 Đã lấp hố <small id="count-done"></small></h2>
-          <div class="shelf-grid" id="list-done" aria-live="polite"></div>
-        </div>
-        <div class="shelf" id="dang-lap">
-          <h2 class="ribbon">⛏️ Đang lấp hố <small id="count-ongoing"></small></h2>
-          <div class="shelf-grid" id="list-ongoing" aria-live="polite"></div>
-        </div>
-      </section>
-
-      <!-- ===== CHƯƠNG MỚI | BÌNH LUẬN ===== -->
-      <section class="dual" id="cap-nhat">
-        <div class="dual-box">
-          <h3>🔔 Chương mới cập nhật</h3>
-          <div class="scroll" id="latest-chapters">
-            <p class="muted">Đang tải…</p>
-          </div>
-        </div>
-        <div class="dual-box">
-          <h3>💬 Bình luận mới</h3>
-          <div class="scroll" id="latest-comments">
-            <p class="muted">Đang tải…</p>
-          </div>
-          <button class="btn-comment" id="btn-comment" type="button">✏️ Viết bình luận</button>
-        </div>
-      </section>
-
-      <!-- ===== BẠN BÈ ===== -->
-      <section class="friends">
-        <div class="friends-title">bạn bè của thỏ</div>
-        <div class="friends-row">
-          <a class="friend" href="#"><div class="slot round" data-label="ảnh"><img src="" alt=""></div><span>[Tên 1]</span></a>
-          <a class="friend" href="#"><div class="slot round" data-label="ảnh"><img src="" alt=""></div><span>[Tên 2]</span></a>
-          <a class="friend" href="#"><div class="slot round" data-label="ảnh"><img src="" alt=""></div><span>[Tên 3]</span></a>
-          <a class="friend" href="#"><div class="slot round" data-label="ảnh"><img src="" alt=""></div><span>[Tên 4]</span></a>
-          <a class="friend" href="#"><div class="slot round" data-label="ảnh"><img src="" alt=""></div><span>[Tên 5]</span></a>
-          <a class="friend" href="#"><div class="slot round" data-label="ảnh"><img src="" alt=""></div><span>[Tên 6]</span></a>
-        </div>
-      </section>
-
-      <footer class="foot">
-        <span>thỏ ăn cỏ · làm bởi [tên bạn]</span>
-      </footer>
-    </div>
-  </div>
-
-  <!-- ===== HỘP VIẾT BÌNH LUẬN (không cần tài khoản) ===== -->
-  <div class="modal" id="modal" hidden>
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cmt-title">
-      <button class="modal-close" id="modal-close" type="button" aria-label="Đóng">✕</button>
-      <form id="cmt-form" class="cmt-form" autocomplete="off">
-        <h3 id="cmt-title">Viết bình luận</h3>
-        <label for="cmt-name">Tên của bạn</label>
-        <input id="cmt-name" type="text" maxlength="30" placeholder="Khách qua đường">
-        <label for="cmt-body">Bình luận</label>
-        <textarea id="cmt-body" maxlength="500" rows="4" placeholder="Viết gì đó cho thỏ nhé…"></textarea>
-        <!-- ô bẫy cho robot, người thật không thấy -->
-        <input id="cmt-site" class="cmt-hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <p class="cmt-status" id="cmt-status" role="status"></p>
-        <button class="btn-comment" id="cmt-send" type="submit">Gửi bình luận</button>
-      </form>
-    </div>
-  </div>
-
-  <noscript><p style="text-align:center">Trang cần bật JavaScript để hiển thị danh sách truyện.</p></noscript>
-    <!-- Firebase (lưu bình luận) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="config.js"></script>
-  <script src="comments-core.js"></script>
-  <script src="script.js"></script>
-  <script src="avatar.js"></script>
+<body>
+<main class="home">
+  <header class="hero"><h1>Thỏ Ăn Cỏ</h1></header>
+  <section class="block" aria-labelledby="h-new">
+    <h2 id="h-new">Chương mới cập nhật</h2>
+    <ol class="latest" id="latest"></ol>
+  </section>
+  <section class="block" aria-labelledby="h-all">
+    <h2 id="h-all">Truyện</h2>
+    <div class="shelf" id="shelf"></div>
+  </section>
+</main>
+<script src="home.js"></script>
 </body>
 </html>

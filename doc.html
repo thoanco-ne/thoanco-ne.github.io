@@ -1,639 +1,69 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Đọc truyện · thỏ ăn cỏ</title>
-  <meta name="robots" content="noindex">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600&family=Dancing+Script:wght@600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="theme.css">
-  <style>
-    /* font bảo mật do build.py tạo ra */
-    @font-face{font-family:"SecuredFont";src:url("fonts/secure-font.woff2") format("woff2");font-display:block}
-    /* màu và font lấy từ theme.css; các tên cũ dưới đây chỉ là tên gọi khác của biến trong theme.css */
-    body{
-      --brown:var(--line-b);--brown-d:var(--text);--cream:var(--panel-solid);--paper:var(--panel-solid);
-      --pink:var(--panel-2);--pink-d:var(--accent-d);--card:var(--panel-solid);
-      --font-hand:var(--font-head);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;font-family:var(--font-body);color:var(--text);line-height:1.6;
-      padding:0 max(14px,env(safe-area-inset-left,0px)) 40px max(14px,env(safe-area-inset-left,0px));
-      -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
-    }
-    a{color:inherit}
-    .wrap{max-width:800px;margin:0 auto;padding-bottom:84px}  /* chừa chỗ để nút ▲▼ không đè nút chương */
-    .top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:14px 0}
-    .btn{
-      font-family:var(--font-body);font-size:14px;text-decoration:none;cursor:pointer;
-      background:var(--pink);color:var(--text);border:1px dashed var(--brown);border-radius:8px;padding:4px 14px;
-    }
-    .btn:hover{background:var(--panel-solid);color:var(--accent)}
-    .btn[aria-disabled="true"]{opacity:.4;pointer-events:none}
-    .tools{display:flex;gap:6px;flex-wrap:wrap}
-    .story-name{margin:2px 0 0;font-family:var(--font-script);font-weight:600;font-size:clamp(26px,6vw,36px);color:var(--text)}
-    #story-card{
-      background:var(--card);border:1px solid var(--line);border-radius:12px;
-      padding:clamp(14px,4vw,28px);margin:10px 0;
-    }
-    #story-card{--pad:clamp(16px,4.5vw,34px)}
-    #story-card{padding:var(--pad)}
-    #chapter-title{margin:0 0 14px;font-family:var(--font-head);font-weight:600;font-size:clamp(20px,4.6vw,27px);color:var(--text)}
-    .nav{display:flex;justify-content:space-between;gap:8px;margin:12px 0}
-    .toc a{
-      display:block;text-decoration:none;padding:9px 12px;border-bottom:1px dashed var(--line);
-    }
-    .toc a:hover{background:var(--pink);color:var(--accent)}
-    .toc a.current{font-weight:600;background:var(--pink);color:var(--accent)}
-    .muted{color:var(--text-soft);font-size:.9rem}
-    noscript{display:block;padding:20px;text-align:center}
-
-    /* ===== BÌNH LUẬN CHƯƠNG ===== */
-    input,textarea{-webkit-user-select:text;user-select:text}
-    .hint{font-size:.85rem;margin:4px 2px 0}
-    .cbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
-    .cbox h2{margin:0 0 8px;font-family:var(--font-head);font-weight:600;font-size:1.15rem;color:var(--text)}
-    .cbox h2 small{font-size:.7em;opacity:.8}
-    .clist{max-height:260px;overflow-y:auto;margin-bottom:10px;scrollbar-width:thin;scrollbar-color:var(--pink-d) transparent}
-    .citem{padding:7px 4px;border-bottom:1px dashed var(--line);font-size:.9rem}
-    .citem b{color:var(--accent-d)}
-    .citem time{float:right;font-size:.72rem;color:var(--text-soft)}
-    .citem p{margin:2px 0 0;overflow-wrap:anywhere;white-space:pre-line}
-    .cform{display:flex;flex-direction:column;gap:6px}
-    .cform label{font-size:.85rem}
-    .cform input[type=text],.cform textarea{
-      width:100%;font:inherit;color:var(--text);background:var(--pink);
-      border:1px solid var(--brown);border-radius:8px;padding:8px 10px;
-    }
-    .cform textarea{resize:vertical;min-height:72px}
-    .cform input:focus-visible,.cform textarea:focus-visible{outline:2px solid var(--pink-d);outline-offset:1px}
-    .chp{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0}
-    .cstatus{min-height:1.2em;margin:0;font-size:.85rem;color:var(--bad)}
-    .cstatus.ok{color:var(--ok)}
-    .csend{align-self:flex-start}
-    .csend:disabled{opacity:.6;cursor:default}
-    /* ===== BẢNG BÌNH LUẬN ĐOẠN ===== */
-    .psheet{position:fixed;inset:0;z-index:9500;display:flex;align-items:flex-end;justify-content:center;background:rgba(20,14,10,.55)}
-    .psheet[hidden]{display:none}
-    .ps-box{
-      width:min(600px,100%);max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;
-      background:var(--panel-solid);color:var(--text);border:1px solid var(--line-b);
-      border-radius:18px 18px 0 0;overflow:hidden;
-    }
-    @media (min-width:700px){.psheet{align-items:center}.ps-box{border-radius:18px;max-height:84vh}}
-    .ps-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px 10px;border-bottom:1px solid var(--line)}
-    .ps-head h3{margin:0;font-family:var(--font-head);font-weight:600;font-size:1.05rem}
-    .ps-x{border:1px solid var(--line-b);background:var(--pink);color:var(--text);width:34px;height:34px;border-radius:10px;font-size:1.05rem;cursor:pointer}
-    .ps-x:hover{color:var(--accent)}
-    .ps-body{flex:1;overflow-y:auto;padding:12px 16px;scrollbar-width:thin;scrollbar-color:var(--line-b) transparent}
-    .ps-label{margin:12px 0 6px;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-soft)}
-    .ps-label:first-child{margin-top:0}
-    .ps-react{display:flex;flex-wrap:wrap;gap:8px}
-    .rbtn{
-      display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:.95rem;cursor:pointer;
-      padding:6px 12px;border-radius:999px;border:1px solid var(--line-b);background:var(--pink);color:var(--text);
-    }
-    .rbtn .n{font-size:.82rem;font-weight:600;min-width:1ch}
-    .rbtn:hover{background:var(--panel-solid)}
-    .rbtn.on{background:var(--accent-d);border-color:var(--accent-d);color:#fff}
-    .rbtn:disabled{opacity:.55;cursor:default}
-    .ps-quote{
-      margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--pink);
-      font-family:'SecuredFont',serif;font-size:.95rem;line-height:1.7;overflow-wrap:anywhere;
-      max-height:7.5em;overflow:auto;-webkit-user-select:none;user-select:none;
-    }
-    .ps-note{margin:0;font-size:.85rem;color:var(--text-soft)}
-    .ps-form{padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--panel-solid);display:flex;flex-direction:column;gap:8px}
-    .ps-row{display:flex;gap:8px;align-items:center}
-    .ps-namewrap{flex:1;position:relative;min-width:0}
-    .ps-form input[type=text],.ps-form textarea{
-      width:100%;font:inherit;font-size:.95rem;color:var(--text);background:var(--pink);
-      border:1px solid var(--line-b);border-radius:12px;padding:9px 12px;
-    }
-    .ps-namewrap input{padding-right:48px}
-    .ps-nc{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:.7rem;color:var(--text-soft)}
-    .ps-form textarea{resize:none;min-height:44px;max-height:120px}
-    .ps-form input:focus-visible,.ps-form textarea:focus-visible{outline:2px solid var(--pink-d);outline-offset:1px}
-    .ps-send{border:0;border-radius:12px;padding:9px 18px;font:600 .95rem var(--font-body);cursor:pointer;background:var(--accent-d);color:#fff}
-    .ps-send:disabled{opacity:.6;cursor:default}
-    .ps-status{min-height:1.1em;margin:0;font-size:.82rem;color:var(--bad)}
-    .ps-status.ok{color:var(--ok)}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thỏ Ăn Cỏ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="theme.js"></script>
 </head>
-<body>
-<script src="age-gate.js"></script>
-<script src="extras.js"></script>
+<body class="reading">
 <div class="wrap">
-  <div class="top">
-    <a class="btn" href="index.html">🏠 trang chủ</a>
-    <div class="tools">
-      <a class="btn" id="btn-toc" href="#">📑 mục lục</a>
-      <button class="btn" id="btn-smaller" type="button" aria-label="Giảm cỡ chữ">A−</button>
-      <button class="btn" id="btn-bigger" type="button" aria-label="Tăng cỡ chữ">A+</button>
-    </div>
-  </div>
-
+  <nav class="bar">
+    <a class="btn" href="index.html">Trang chủ</a>
+    <a class="btn" id="btn-toc" href="#">Mục lục</a>
+  </nav>
   <p class="story-name" id="story-name"></p>
 
-  <!-- Chế độ đọc chương -->
   <section id="reader" hidden>
-    <div id="story-card">
-      <h1 id="chapter-title"></h1>
-      <!-- Nội dung chương được nạp vào "closed shadow root" ở đây -->
-      <div id="secure-shadow-root"></div>
+    <article class="page" id="story-card">
+      <div class="page-inner">
+        <h1 id="chapter-title"></h1>
+        <div id="secure-shadow-root"></div>
+      </div>
+    </article>
+    <div class="pager">
+      <a class="btn" id="btn-prev" href="#">‹ Chương trước</a>
+      <a class="btn" id="btn-next" href="#">Chương sau ›</a>
     </div>
-    <div class="nav">
-      <a class="btn" id="btn-prev" href="#">← chương trước</a>
-      <a class="btn" id="btn-next" href="#">chương sau →</a>
-    </div>
-
-    <!-- Bình luận cả chương (không cần tài khoản) -->
-    <section class="cbox" id="chapter-comments" hidden aria-labelledby="cc-title">
-      <h2 id="cc-title">💬 Bình luận chương <small id="cc-count"></small></h2>
-      <div class="clist" id="cc-list"><p class="muted">Đang tải…</p></div>
-      <form class="cform" id="cc-form" autocomplete="off">
-        <label for="cc-name">Tên của bạn</label>
-        <input id="cc-name" type="text" maxlength="30" placeholder="Khách qua đường">
-        <label for="cc-body">Bình luận</label>
-        <textarea id="cc-body" maxlength="500" rows="3" placeholder="Bạn nghĩ gì về chương này?"></textarea>
-        <input id="cc-site" class="chp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <p class="cstatus" id="cc-status" role="status"></p>
-        <button class="btn csend" id="cc-send" type="submit">Gửi bình luận</button>
-      </form>
-    </section>
   </section>
 
-  <!-- Chế độ xem mục lục -->
-  <section id="toc-view" hidden>
-    <div id="story-card-toc" class="toc" style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 6px"></div>
-  </section>
-
-  <!-- Bảng bình luận và cảm xúc cho từng đoạn -->
-  <div class="psheet" id="psheet" hidden>
-    <div class="ps-box" role="dialog" aria-modal="true" aria-labelledby="ps-title">
-      <div class="ps-head">
-        <h3 id="ps-title">Đoạn 1</h3>
-        <button class="ps-x" id="ps-close" type="button" aria-label="Đóng">✕</button>
-      </div>
-      <div class="ps-body">
-        <div class="ps-label">Cảm xúc về đoạn này</div>
-        <div class="ps-react" id="ps-react"></div>
-        <div class="ps-label">Đoạn đang bình luận</div>
-        <p class="ps-quote" id="ps-quote"></p>
-        <div class="ps-label" id="ps-count">Bình luận</div>
-        <div id="ps-list"></div>
-      </div>
-      <form class="ps-form" id="ps-form" autocomplete="off">
-        <div class="ps-row">
-          <div class="ps-namewrap">
-            <input id="ps-name" type="text" maxlength="30" placeholder="Tên (không bắt buộc)" aria-label="Tên của bạn">
-            <span class="ps-nc" id="ps-nc">0/30</span>
-          </div>
-          <button class="ps-send" id="ps-send" type="submit">Gửi</button>
-        </div>
-        <textarea id="ps-body" maxlength="500" rows="2" placeholder="Viết bình luận…" aria-label="Bình luận"></textarea>
-        <input id="ps-site" class="chp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <p class="ps-status" id="ps-status" role="status"></p>
-      </form>
-    </div>
-  </div>
-
+  <section id="toc-view" hidden><div class="toc" id="toc"></div></section>
   <p class="muted" id="message" hidden></p>
-  <noscript>Trang cần bật JavaScript để đọc truyện.</noscript>
 </div>
 
-<!-- Firebase (lưu bình luận) -->
+<!-- Bảng bình luận và cảm xúc cho từng đoạn -->
+<div class="psheet" id="psheet" hidden>
+  <div class="ps-box" role="dialog" aria-modal="true" aria-labelledby="ps-title">
+    <div class="ps-head">
+      <h3 id="ps-title">Đoạn 1</h3>
+      <button class="ps-x" id="ps-close" type="button" aria-label="Đóng">✕</button>
+    </div>
+    <div class="ps-body">
+      <div class="ps-react" id="ps-react"></div>
+      <p class="ps-quote" id="ps-quote"></p>
+      <div class="ps-label" id="ps-count">Bình luận</div>
+      <div id="ps-list"></div>
+    </div>
+    <form class="ps-form" id="ps-form" autocomplete="off">
+      <div class="ps-row">
+        <input id="ps-name" type="text" maxlength="30" placeholder="Tên (không bắt buộc)" aria-label="Tên của bạn">
+        <button class="ps-send" id="ps-send" type="submit">Gửi</button>
+      </div>
+      <textarea id="ps-body" maxlength="500" rows="2" placeholder="Viết bình luận…" aria-label="Bình luận"></textarea>
+      <input id="ps-site" class="chp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="ps-status" id="ps-status" role="status"></p>
+    </form>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="config.js"></script>
 <script src="comments-core.js"></script>
-<script>
-(function () {
-  "use strict";
-  var $ = function (s) { return document.querySelector(s); };
-  var params = new URLSearchParams(location.search);
-  var SAFE = /^[A-Za-z0-9_-]+$/;
-  var STORY = params.get("story") || "";
-  var CHAPTER = params.get("chapter") || "";
-
-  var chapters = [];
-  var storyTitle = "";
-  var fontSize = 18;
-  try { fontSize = parseInt(localStorage.getItem("tac-font"), 10) || 18; } catch (e) {}
-  var shadow = null;
-
-  function say(text) {
-    var m = $("#message"); m.textContent = text; m.hidden = false;
-  }
-
-  /* ---------- cỡ chữ ---------- */
-  function applyFont() {
-    if (!shadow) return;
-    var c = shadow.getElementById("story-content");
-    if (c) c.style.fontSize = fontSize + "px";
-  }
-  $("#btn-smaller").addEventListener("click", function () {
-    fontSize = Math.max(14, fontSize - 1); save(); applyFont();
-  });
-  $("#btn-bigger").addEventListener("click", function () {
-    fontSize = Math.min(30, fontSize + 1); save(); applyFont();
-  });
-  function save() { try { localStorage.setItem("tac-font", String(fontSize)); } catch (e) {} }
-
-  /* ---------- danh sách chương (list.txt, định dạng "id: tiêu đề") ---------- */
-  function loadList() {
-    return fetch(STORY + "/list.txt", { cache: "no-cache" }).then(function (r) {
-      if (!r.ok) throw new Error("Chưa có danh sách chương");
-      return r.text();
-    }).then(function (text) {
-      chapters = [];
-      text.split(/\r?\n/).forEach(function (line) {
-        line = line.trim();
-        if (!line) return;
-        if (line.indexOf("# ") === 0) { storyTitle = line.slice(2).trim(); return; }
-        var i = line.indexOf(":");
-        if (i > 0) chapters.push({ id: line.slice(0, i).trim(), title: line.slice(i + 1).trim() });
-      });
-    });
-  }
-
-  function link(id) {
-    return "doc.html?story=" + encodeURIComponent(STORY) + "&chapter=" + encodeURIComponent(id);
-  }
-
-  function showToc() {
-    var box = $("#story-card-toc");
-    box.textContent = "";
-    if (!chapters.length) { say("Truyện này chưa có chương nào."); return; }
-    chapters.forEach(function (ch) {
-      var a = document.createElement("a");
-      a.href = link(ch.id);
-      a.textContent = ch.title;
-      if (ch.id === CHAPTER) a.className = "current";
-      box.appendChild(a);
-    });
-    $("#toc-view").hidden = false;
-  }
-
-  /* ---------- đọc chương ---------- */
-  function showChapter() {
-    return fetch(STORY + "/" + CHAPTER + ".txt", { cache: "no-cache" }).then(function (r) {
-      if (!r.ok) throw new Error("Chương này chưa có.");
-      return r.text();
-    }).then(function (plain) {
-      // mỗi dòng là một đoạn (file chương xuống dòng một lần hay hai lần đều được)
-      var blocks = plain.replace(/\r/g, "").split(/\n+/);
-      var title = "";
-      var paras = [];
-      blocks.forEach(function (b) {
-        var t = b.trim();
-        if (!t) return;
-        if (!title && t.indexOf("# ") === 0) { title = t.slice(2).split("\n")[0].trim(); t = t.split("\n").slice(1).join("\n").trim(); if (!t) return; }
-        paras.push(t);
-      });
-
-      var idx = chapters.findIndex(function (c) { return c.id === CHAPTER; });
-      if (!title && idx >= 0) title = chapters[idx].title;
-      $("#chapter-title").textContent = title || CHAPTER;
-      document.title = (title || "Đọc truyện") + " · thỏ ăn cỏ";
-
-      commentsOn = !!(window.TAC && TAC.init());
-      // "closed" shadow root: mã trên trang không truy cập được vào nội dung bên trong
-      var host = $("#secure-shadow-root");
-      host.textContent = "";
-      shadow = host.attachShadow({ mode: "closed" });
-
-      var style = document.createElement("style");
-      style.textContent =
-        "#story-content{font-family:'SecuredFont',serif;line-height:1.9;color:inherit;font-size:" + fontSize + "px}" +
-        ".p{margin:0 0 .25rem;white-space:pre-line;word-break:break-word}" + PC_CSS;
-      shadow.appendChild(style);
-
-      var content = document.createElement("div");
-      content.id = "story-content";
-      paras.forEach(function (p, i) {
-        var d = document.createElement("div");
-        d.className = "p";
-        d.setAttribute("data-i", String(i));
-        d.appendChild(document.createTextNode(p));   // văn bản thuần: không chèn mã HTML nên an toàn
-        content.appendChild(d);
-        var bar = document.createElement("div");
-        bar.className = "pbar";
-        var rx = document.createElement("span");
-        rx.className = "rx";
-        rx.setAttribute("data-i", String(i));
-        var b = document.createElement("button");
-        b.type = "button";
-        b.className = "pc";
-        b.setAttribute("data-i", String(i));
-        b.setAttribute("aria-label", "Bình luận và cảm xúc đoạn " + (i + 1));
-        b.textContent = "+";
-        b.addEventListener("click", function () { openPara(i); });
-        bar.appendChild(rx);
-        bar.appendChild(b);
-        content.appendChild(bar);
-      });
-      shadow.appendChild(content);
-
-      $("#reader").hidden = false;
-      try { localStorage.setItem("last_read_" + STORY, CHAPTER); } catch (e) {}
-
-      var prev = $("#btn-prev"), next = $("#btn-next");
-      if (idx > 0) { prev.href = link(chapters[idx - 1].id); } else { prev.setAttribute("aria-disabled", "true"); }
-      if (idx >= 0 && idx < chapters.length - 1) { next.href = link(chapters[idx + 1].id); } else { next.setAttribute("aria-disabled", "true"); }
-      paraTexts = paras;
-      startChapterComments();
-      var jump = parseInt(params.get("p"), 10);
-      if (!isNaN(jump) && jump >= 0 && jump < paras.length) {
-        setTimeout(function () { jumpToPara(jump); }, 200);
-      } else {
-        window.scrollTo(0, 0);
-      }
-    });
-  }
-
-  /* ---------- bình luận chương và từng đoạn ---------- */
-  var commentsOn = false;
-  var allComments = [];
-  function ago(ms) {
-    var s = Math.max(0, (Date.now() - ms) / 1000);
-    if (!ms) return "";
-    if (s < 60) return "vừa xong";
-    if (s < 3600) return Math.floor(s / 60) + " phút trước";
-    if (s < 86400) return Math.floor(s / 3600) + " giờ trước";
-    if (s < 86400 * 30) return Math.floor(s / 86400) + " ngày trước";
-    return new Date(ms).toLocaleDateString("vi-VN");
-  }
-
-  function renderList(box, items, emptyText) {
-    box.textContent = "";
-    if (!items.length) {
-      var e = document.createElement("p");
-      e.className = "muted";
-      e.textContent = emptyText;
-      box.appendChild(e);
-      return;
-    }
-    items.forEach(function (c) {
-      var d = document.createElement("div");
-      d.className = "citem";
-      var t = document.createElement("time");
-      t.textContent = ago(c.t);
-      var b = document.createElement("b");
-      b.textContent = c.name || "ẩn danh";
-      var p = document.createElement("p");
-      p.textContent = c.body || "";
-      d.appendChild(t); d.appendChild(b); d.appendChild(p);
-      box.appendChild(d);
-    });
-  }
-
-  function wireForm(prefix, getTarget, cls) {
-    cls = cls || "cstatus";
-    var form = $("#" + prefix + "-form"), nameEl = $("#" + prefix + "-name"), bodyEl = $("#" + prefix + "-body");
-    var trap = $("#" + prefix + "-site"), status = $("#" + prefix + "-status"), send = $("#" + prefix + "-send");
-    nameEl.value = TAC.savedName();
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      if (trap.value) return;                         // robot điền ô bẫy thì bỏ qua
-      var tg = getTarget();
-      if (!tg) return;
-      send.disabled = true;
-      status.textContent = "Đang gửi…";
-      status.className = cls + " ok";
-      TAC.post({ name: nameEl.value, body: bodyEl.value, s: tg.s, c: tg.c, p: tg.p }).then(function () {
-        bodyEl.value = "";
-        status.textContent = "Đã gửi, cảm ơn bạn!";
-        status.className = cls + " ok";
-      }).catch(function (err) {
-        status.textContent = err.message;
-        status.className = cls;
-      }).then(function () { send.disabled = false; });
-    });
-  }
-
-  var paraTexts = [];
-  var activePara = null;
-  var reactions = {};          // { "3": { tim: 2, khoc: 0, ... } }
-  var RTYPES = [
-    { t: "tim",  e: "❤️", label: "Thả tim" },
-    { t: "khoc", e: "😢", label: "Khóc" },
-    { t: "gian", e: "😡", label: "Tức giận" },
-    { t: "cuoi", e: "😂", label: "Cười chảy nước mắt" }
-  ];
-  var PC_CSS =
-    ".pbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:0 0 1.15rem;min-height:26px;-webkit-user-select:none;user-select:none}" +
-    ".rx{font-size:.78rem;letter-spacing:1px;color:inherit;opacity:.85}" +
-    ".pc{font:600 .78rem system-ui,sans-serif;line-height:1;cursor:pointer;padding:.35em .8em;border-radius:999px;" +
-    "border:1px solid var(--line-b,#b4967e);background:var(--panel-2,#ecdccb);color:var(--accent-d,#a8745a)}" +
-    ".pc:hover,.pc:focus-visible{color:var(--accent,#8b5a44);background:var(--panel-solid,#faf3ea)}" +
-    ".pc.has{border-color:var(--accent-d,#a8745a)}" +
-    ".p.flash{background:rgba(168,116,90,.18);border-radius:6px;transition:background .6s}";
-
-  function mineGet() { try { return JSON.parse(localStorage.getItem("tac-react") || "{}"); } catch (e) { return {}; } }
-  function mineSet(m) { try { localStorage.setItem("tac-react", JSON.stringify(m)); } catch (e) {} }
-  function mkey(p, t) { return STORY + "|" + CHAPTER + "|" + p + "|" + t; }
-
-  function refreshBars() {
-    if (!shadow) return;
-    var cc = {};
-    allComments.forEach(function (c) { if (c.p !== null) cc[c.p] = (cc[c.p] || 0) + 1; });
-    Array.prototype.forEach.call(shadow.querySelectorAll(".pc"), function (b) {
-      var i = parseInt(b.getAttribute("data-i"), 10), n = cc[i] || 0;
-      b.textContent = n ? "+" + n : "+";
-      b.classList.toggle("has", n > 0);
-    });
-    Array.prototype.forEach.call(shadow.querySelectorAll(".rx"), function (s) {
-      var i = parseInt(s.getAttribute("data-i"), 10), r = reactions[i] || {};
-      var list = RTYPES.filter(function (x) { return (r[x.t] || 0) > 0; })
-        .sort(function (a, b2) { return (r[b2.t] || 0) - (r[a.t] || 0); }).slice(0, 3);
-      var total = RTYPES.reduce(function (sum, x) { return sum + (r[x.t] || 0); }, 0);
-      s.textContent = list.length ? list.map(function (x) { return x.e; }).join("") + " " + total : "";
-    });
-  }
-
-  function renderReactButtons() {
-    var box = $("#ps-react");
-    box.textContent = "";
-    if (activePara === null) return;
-    var r = reactions[activePara] || {}, mine = mineGet();
-    RTYPES.forEach(function (x) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "rbtn" + (mine[mkey(activePara, x.t)] ? " on" : "");
-      b.setAttribute("data-t", x.t);
-      b.setAttribute("aria-label", x.label);
-      b.setAttribute("aria-pressed", mine[mkey(activePara, x.t)] ? "true" : "false");
-      b.title = x.label;
-      b.disabled = !commentsOn;
-      var e = document.createElement("span"); e.textContent = x.e;
-      var n = document.createElement("span"); n.className = "n"; n.textContent = String(r[x.t] || 0);
-      b.appendChild(e); b.appendChild(n);
-      box.appendChild(b);
-    });
-  }
-
-  function renderParaList() {
-    var items = allComments.filter(function (c) { return c.p === activePara; });
-    $("#ps-count").textContent = "Bình luận (" + items.length + ")";
-    renderList($("#ps-list"), items, "Chưa có bình luận nào cho đoạn này.");
-  }
-
-  function refreshComments() {
-    var chap = allComments.filter(function (c) { return c.p === null; });
-    renderList($("#cc-list"), chap, "Chưa có bình luận nào cho chương này.");
-    $("#cc-count").textContent = chap.length ? "(" + chap.length + ")" : "";
-    refreshBars();
-    if (activePara !== null) renderParaList();
-  }
-
-  function openPara(i) {
-    activePara = i;
-    $("#ps-title").textContent = "Đoạn " + (i + 1);
-    var q = paraTexts[i] || "";
-    $("#ps-quote").textContent = q.length > 180 ? q.slice(0, 180) + "…" : q;
-    $("#ps-form").style.display = commentsOn ? "" : "none";
-    $("#ps-status").textContent = "";
-    renderReactButtons();
-    if (commentsOn) {
-      renderParaList();
-    } else {
-      $("#ps-count").textContent = "Bình luận";
-      var n = document.createElement("p");
-      n.className = "ps-note";
-      n.textContent = "Bình luận và cảm xúc chưa được bật. Điền config.js (xem README) để dùng.";
-      $("#ps-list").textContent = "";
-      $("#ps-list").appendChild(n);
-    }
-    $("#psheet").hidden = false;
-    document.documentElement.style.overflow = "hidden";
-  }
-  function closePara() {
-    $("#psheet").hidden = true;
-    activePara = null;
-    document.documentElement.style.overflow = "";
-  }
-
-  function jumpToPara(i) {
-    var el = shadow && shadow.querySelector('.p[data-i="' + i + '"]');
-    if (el) {
-      el.scrollIntoView({ block: "center" });
-      el.classList.add("flash");
-      setTimeout(function () { el.classList.remove("flash"); }, 2500);
-    }
-    openPara(i);
-  }
-
-  function onReact(e) {
-    var b = e.target.closest && e.target.closest(".rbtn");
-    if (!b || activePara === null || !commentsOn) return;
-    var t = b.getAttribute("data-t"), p = activePara, k = mkey(p, t);
-    var mine = mineGet(), delta = mine[k] ? -1 : 1;
-    function apply(d) {
-      var r = reactions[p] = reactions[p] || {};
-      r[t] = Math.max(0, (r[t] || 0) + d);
-      if (d > 0) mine[k] = 1; else delete mine[k];
-      mineSet(mine);
-      refreshBars();
-      if (activePara === p) renderReactButtons();
-    }
-    apply(delta);
-    TAC.react(STORY, CHAPTER, p, t, delta).catch(function () { apply(-delta); });
-  }
-
-  function startChapterComments() {
-    if (!commentsOn) return;
-    $("#chapter-comments").hidden = false;
-    TAC.watchChapter(STORY, CHAPTER, function (list) { allComments = list; refreshComments(); },
-      function () { allComments = []; refreshComments(); });
-    TAC.watchReactions(STORY, CHAPTER, function (data) {
-      reactions = data || {};
-      refreshBars();
-      if (activePara !== null) renderReactButtons();
-    });
-  }
-
-  if (window.TAC) {
-    wireForm("cc", function () { return { s: STORY, c: CHAPTER }; });
-    wireForm("ps", function () { return activePara === null ? null : { s: STORY, c: CHAPTER, p: activePara }; }, "ps-status");
-    $("#ps-react").addEventListener("click", onReact);
-    $("#ps-close").addEventListener("click", closePara);
-    $("#psheet").addEventListener("click", function (e) { if (e.target === this) closePara(); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && activePara !== null) closePara(); });
-    var psName = $("#ps-name"), psNc = $("#ps-nc");
-    function ncount() { psNc.textContent = psName.value.length + "/30"; }
-    psName.addEventListener("input", ncount); ncount();
-  }
-
-  /* ---------- chống sao chép ---------- */
-  var WEIRD = "aàảãáạăằẳẵắặâầẩẫấậbcdđeèẻẽéẹêềểễếệghiìỉĩíịklmnoòỏõóọôồổỗốộơờởỡớợpqrstuùủũúụưừửữứựvxyỳỷỹýỵz";
-  function scramble(text) {
-    return Array.from(text).map(function (ch) {
-      if (ch === " ") {
-        var r = Math.random();
-        if (r < 0.15) return " ‌";
-        if (r < 0.30) return " ​";
-        return " ";
-      }
-      if (ch === "\n" || ch === "\r") return ch;
-      if (/[.,!?;:()"'“”‘’]/.test(ch)) return ch;
-      if (Math.random() < 0.8) {
-        var c = WEIRD[Math.floor(Math.random() * WEIRD.length)];
-        c = Math.random() < 0.5 ? c.toUpperCase() : c.toLowerCase();
-        if (Math.random() < 0.2) c += "‌";
-        return c;
-      }
-      return ch;
-    }).join("");
-  }
-
-  document.addEventListener("copy", function (e) {
-    var sel = window.getSelection();
-    var card = $("#story-card");
-    if (!sel || !sel.rangeCount || !card) return;
-    var range = sel.getRangeAt(0);
-    var text = sel.toString();
-    if (text && card.contains(range.commonAncestorContainer)) {
-      e.preventDefault();
-      if (e.clipboardData) {
-        var bad = scramble(text);
-        e.clipboardData.setData("text/plain", bad);
-        e.clipboardData.setData("text/html", bad);
-      }
-    }
-  });
-  function inField(e) {
-    return e.target && e.target.closest && e.target.closest("input,textarea");
-  }
-  ["cut", "contextmenu", "dragstart"].forEach(function (ev) {
-    document.addEventListener(ev, function (e) { if (!inField(e)) e.preventDefault(); });
-  });
-  document.addEventListener("keydown", function (e) {
-    var k = (e.key || "").toLowerCase();
-    if (!inField(e) && (e.ctrlKey || e.metaKey) && (k === "x" || k === "s" || k === "u" || k === "p")) e.preventDefault();
-    if (e.key === "F12") e.preventDefault();
-  });
-
-  /* ---------- khởi động ---------- */
-  if (!STORY || !SAFE.test(STORY) || (CHAPTER && !SAFE.test(CHAPTER))) {
-    say("Đường dẫn chưa đúng. Hãy quay lại trang chủ và chọn truyện.");
-    return;
-  }
-  $("#btn-toc").href = "doc.html?story=" + encodeURIComponent(STORY);
-
-  loadList().catch(function () { chapters = []; }).then(function () {
-    $("#story-name").textContent = storyTitle || "";
-    if (!CHAPTER) {
-      document.title = (storyTitle || "Mục lục") + " · thỏ ăn cỏ";
-      showToc();
-      return;
-    }
-    return showChapter();
-  }).catch(function (err) { say(err.message || "Không tải được chương."); });
-})();
-</script>
+<script src="reader.js"></script>
 </body>
 </html>
