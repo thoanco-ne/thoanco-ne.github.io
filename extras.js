@@ -2,6 +2,7 @@
    thỏ ăn cỏ - extras.js
    1) Đổi hình con trỏ chuột cho toàn web
    2) Nút lên đầu trang / xuống cuối trang
+   3) Nút 🌓 đổi nền sáng / tối
    Cả hai trang (index.html và doc.html) đều dùng file này, nên chỉnh ở đây là đổi cả web.
    ========================================================= */
 (function () {
@@ -28,11 +29,18 @@
     ".tac-jump{position:fixed;z-index:9000;right:max(12px,env(safe-area-inset-right,0px));" +
     "bottom:max(14px,env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px}" +
     ".tac-jump button{width:42px;height:42px;border-radius:50%;padding:0;display:grid;place-items:center;" +
-    "font:700 17px/1 'Quicksand',system-ui,sans-serif;color:#5a403a;background:#f7d8d8;" +
-    "border:2px dashed #7d5d52;box-shadow:0 3px 0 rgba(90,64,58,.25);transition:transform .15s,background .15s}" +
-    ".tac-jump button:hover{background:#fff;transform:translateY(-2px)}" +
-    ".tac-jump button:focus-visible{outline:3px solid #e3a1a1;outline-offset:2px}" +
+    "font:600 16px/1 'Be Vietnam Pro',system-ui,sans-serif;color:var(--text,#E0E8D3);background:var(--panel-2,rgba(46,51,37,.9));" +
+    "border:1px dashed var(--line-b,#7c8c63);transition:background .15s,color .15s}" +
+    ".tac-jump button:hover{background:var(--panel-solid,#171913);color:var(--accent,#E6CCD3)}" +
+    ".tac-jump button:focus-visible{outline:2px solid var(--accent-d,#C799A7);outline-offset:2px}" +
     "@media (max-width:560px){.tac-jump button{width:38px;height:38px}}";
+
+  /* ---------- 3. GIAO DIỆN SÁNG / TỐI (nhớ lựa chọn của người đọc) ---------- */
+  var LABEL_THEME = "Đổi nền sáng / tối";
+  function applyTheme(light) { if (document.body) document.body.classList.toggle("light", light); }
+  var savedLight = false;
+  try { savedLight = localStorage.getItem("tac-theme") === "light"; } catch (e) {}
+  applyTheme(savedLight);
 
   var style = document.createElement("style");
   style.textContent = css;
@@ -53,6 +61,11 @@
     box.className = "tac-jump";
     box.appendChild(make(LABEL_TOP, "▲", function () {
       window.scrollTo({ top: 0, behavior: "smooth" });
+    }));
+    box.appendChild(make(LABEL_THEME, "🌓", function () {
+      var light = !document.body.classList.contains("light");
+      applyTheme(light);
+      try { localStorage.setItem("tac-theme", light ? "light" : "dark"); } catch (e) {}
     }));
     box.appendChild(make(LABEL_BOTTOM, "▼", function () {
       window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });

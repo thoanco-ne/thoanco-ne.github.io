@@ -1,0 +1,63 @@
+/* =========================================================
+   thỏ ăn cỏ - theme.css
+   MỘT chỗ duy nhất để đổi màu, font, ảnh nền cho CẢ web (trang chủ và trang đọc truyện).
+   Tông: xanh rêu tối + hồng bụi, lấy cảm hứng từ skin "archive of our own".
+   ========================================================= */
+:root{
+  /* ---- ẢNH NỀN (tuỳ chọn) ----
+     Bỏ ảnh vào thư mục images/ rồi bỏ dấu chú thích ở dòng dưới. Ảnh được phủ kín và đứng yên khi cuộn.
+     Khuyên dùng ảnh tối hoặc đã làm mờ để chữ dễ đọc. */
+  --bg-img:none;
+  /* --bg-img:url("images/nen.jpg"); */
+
+  /* ---- ẢNH HOẠ TIẾT CHO DẢI ĐẦU TRANG (tuỳ chọn, ảnh nhỏ lặp lại) ---- */
+  --head-img:none;
+  /* --head-img:url("images/hoa-van.png"); */
+
+  /* ---- MÀU ---- */
+  --bg:#171913;                    /* nền khi chưa có ảnh */
+  --panel:rgba(23,25,19,.74);      /* khung bán trong suốt */
+  --panel-solid:#171913;           /* khung đặc */
+  --panel-2:rgba(46,51,37,.72);    /* nút, ô nhập */
+  --text:#E0E8D3;                  /* chữ chính (xanh sage nhạt) */
+  --text-soft:#A9B598;             /* chữ phụ */
+  --accent:#E6CCD3;                /* màu khi rê chuột (hồng nhạt) */
+  --accent-d:#C799A7;              /* hồng bụi: tiêu đề nhỏ, nhấn */
+  --line:#4d5a3b;                  /* viền khung */
+  --line-b:#7c8c63;                /* viền nút, viền nét đứt */
+  --ok:#9fc79f;
+  --bad:#e0a0a0;
+
+  /* ---- FONT (đều có đủ tiếng Việt) ---- */
+  --font-body:"Be Vietnam Pro","Quicksand",system-ui,sans-serif;
+  --font-head:"Lora","Merriweather","Times New Roman",serif;
+  --font-script:"Dancing Script","Lora",cursive;
+}
+
+/* Giao diện sáng (người đọc bấm nút 🌓 để đổi) */
+body.light{
+  --bg:#f1ece2;
+  --panel:rgba(255,255,255,.72);
+  --panel-solid:#fbf8f2;
+  --panel-2:rgba(214,223,196,.75);
+  --text:#33402a;
+  --text-soft:#6c7a58;
+  --accent:#a8566b;
+  --accent-d:#b0707f;
+  --line:#c2ccaa;
+  --line-b:#829167;
+  --ok:#3f7a46;
+  --bad:#a14d4d;
+}
+
+body{
+  background:var(--bg);
+  background-image:var(--bg-img);
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+  background-repeat:no-repeat;
+}
+/* thanh cuộn của cả trang */
+html{scrollbar-color:var(--line-b) var(--bg)}
+::selection{background:var(--accent-d);color:#171913}
