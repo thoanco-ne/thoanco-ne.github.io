@@ -28,6 +28,14 @@
     document.documentElement.style.setProperty("--rs", fs + "px"); render();
   }
 
+  /* ---------- lịch sử đọc: nhớ các chương đã mở (lưu trong trình duyệt của người đọc) ---------- */
+  function readAll() { try { return JSON.parse(localStorage.getItem("tac-read") || "{}"); } catch (e) { return {}; } }
+  function readGet() { return readAll()[STORY] || {}; }
+  function readMark(id) {
+    var all = readAll(); (all[STORY] = all[STORY] || {})[id] = 1;
+    try { localStorage.setItem("tac-read", JSON.stringify(all)); } catch (e) {}
+  }
+
   /* ---------- tải danh sách chương + thông tin truyện ---------- */
   function loadAll() {
     return Promise.all([
@@ -55,7 +63,7 @@
     var box = $("#toc"), cm = {}, lk = {};
     chapters.forEach(function (ch) {
       var a = el("a", "chap"); a.href = link(ch.id);
-      a.appendChild(el("span", "", ch.title));
+      a.appendChild(el("span", "", ch.title + (readGet()[ch.id] ? " 👀" : "")));   // 👀 = chương đã mở đọc
       var c = el("span", "cn", "💬 0"), l = el("span", "cn", "🥕 0"); c.setAttribute("data-c", ch.id); l.setAttribute("data-l", ch.id);
       a.appendChild(c); a.appendChild(l);
       a.appendChild(el("em", "", dates[ch.id] ? new Date(dates[ch.id]).toLocaleDateString("vi-VN") : ""));
@@ -121,7 +129,7 @@
         TAC.watchReactions(STORY, CHAPTER, function (d) { reactions = d || {}; refresh(); });
         TAC.watchLikes(STORY, function (d) { likes = d || {}; refresh(); });
       } else $("#like").disabled = true;
-      startReader(); refresh(); window.scrollTo(0, 0);
+      readMark(CHAPTER); startReader(); refresh(); window.scrollTo(0, 0);
     });
   }
 
