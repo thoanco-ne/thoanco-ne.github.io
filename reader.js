@@ -36,6 +36,14 @@
     try { localStorage.setItem("tac-read", JSON.stringify(all)); } catch (e) {}
   }
 
+  /* ---------- đọc tiếp: nhớ chương mở gần nhất và vị trí cuộn (0 đến 1) của từng truyện ---------- */
+  function lastGet() { try { return JSON.parse(localStorage.getItem("tac-last") || "{}")[STORY] || null; } catch (e) { return null; } }
+  function lastSet(c, p) {
+    try { var all = JSON.parse(localStorage.getItem("tac-last") || "{}"); all[STORY] = { c: c, p: p }; localStorage.setItem("tac-last", JSON.stringify(all)); } catch (e) {}
+  }
+  function cardBottom() { return $("#story-card").getBoundingClientRect().bottom + window.scrollY; }
+  function progress() { var span = Math.max(0, cardBottom() - window.innerHeight); return span <= 0 ? 1 : Math.min(1, Math.max(0, window.scrollY / span)); }
+
   /* ---------- tải danh sách chương + thông tin truyện ---------- */
   function loadAll() {
     return Promise.all([
@@ -81,10 +89,21 @@
     paint();
     if (TAC.init()) { TAC.countByStory(STORY, function (m) { cm = m; paint(); }); TAC.watchLikes(STORY, function (m) { lk = m; paint(); }); }
     function eyes() { var rd = readGet(); chapters.forEach(function (ch) { tspans[ch.id].textContent = ch.title + (rd[ch.id] ? " 👀" : ""); }); }   // 👀 = chương đã mở đọc
-    eyes();
-    window.addEventListener("pageshow", eyes);                       // quay lại bằng nút Back trên điện thoại (trang lấy từ bộ nhớ đệm)
-    document.addEventListener("visibilitychange", function () { if (!document.hidden) eyes(); });
-    window.addEventListener("focus", eyes);
+    function resume() {
+      var b = $("#go-resume"), l = lastGet(), i = l ? chapters.findIndex(function (c) { return c.id === l.c; }) : -1;
+      b.textContent = "▶️ Đọc tiếp";
+      if (i < 0) { b.setAttribute("aria-disabled", "true"); b.href = "#"; return; }
+      var done = l.p >= 0.97 && i < chapters.length - 1, t = done ? chapters[i + 1] : chapters[i];   // đọc hết chương rồi thì sang chương sau
+      b.removeAttribute("aria-disabled"); b.href = link(t.id) + (done ? "" : "&tiep=1");
+      b.appendChild(el("span", "gs", t.title));
+    }
+    if (chapters.length) { $("#go-first").href = link(chapters[0].id); $("#go-last").href = link(chapters[chapters.length - 1].id); }
+    else $(".go").hidden = true;
+    function refreshTop() { eyes(); resume(); }
+    refreshTop();
+    window.addEventListener("pageshow", refreshTop);                 // quay lại bằng nút Back trên điện thoại (trang lấy từ bộ nhớ đệm)
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) refreshTop(); });
+    window.addEventListener("focus", refreshTop);
     $("#toc-view").hidden = false;
   }
 
@@ -297,7 +316,17 @@
   }
   function startReader() {
     var ready = document.fonts && document.fonts.load ? document.fonts.load("18px SecuredFont", "Aáệ").catch(function () {}) : Promise.resolve();
-    ready.then(function () { render(); setTimeout(guard, 700); setInterval(guard, 1500); });
+    var saved = lastGet(), want = params.get("tiep") && saved && saved.c === CHAPTER ? saved.p : 0;
+    lastSet(CHAPTER, want);                                          // mở chương nào thì đó là chương đang đọc
+    ready.then(function () {
+      render(); setTimeout(guard, 700); setInterval(guard, 1500);
+      if (want > 0) window.scrollTo(0, want * Math.max(0, cardBottom() - window.innerHeight));
+      lastSet(CHAPTER, Math.max(want, progress()));
+    });
+    var tt = null;
+    function savePos() { if (!locked) lastSet(CHAPTER, progress()); }
+    window.addEventListener("scroll", function () { if (!tt) tt = setTimeout(function () { tt = null; savePos(); }, 400); });
+    window.addEventListener("pagehide", savePos);
     var t; window.addEventListener("resize", function () { clearTimeout(t); t = setTimeout(render, 150); });
     new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   }

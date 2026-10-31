@@ -138,3 +138,5 @@ i.tag{font-style:normal}
 @media print{#reader{display:none!important}}
 .lock p{font-family:"Be Vietnam Pro",system-ui,sans-serif}
 .avatar.has-frame{border-color:transparent;box-shadow:none}
+.mt .go{display:flex;gap:10px;flex-wrap:wrap;padding:14px}.go .btn{flex:1 1 150px;text-align:center;min-width:0}
+.go .gs{display:block;font-size:.72rem;font-weight:500;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
