@@ -42,6 +42,45 @@ def git_date(path):
     return datetime.fromtimestamp(os.path.getmtime(path), timezone.utc)
 
 
+def optimize_images():
+    """Thu nhỏ và nén ảnh trong public/ (khung ảnh đại diện, ảnh đại diện, ảnh bìa...). Không có Pillow thì bỏ qua."""
+    try:
+        from PIL import Image
+    except ImportError:
+        print("Chưa cài Pillow nên bỏ qua bước nén ảnh (pip install pillow).")
+        return
+    saved = 0
+    for root, _, files in os.walk(OUT):
+        for f in files:
+            if not f.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+                continue
+            p = os.path.join(root, f)
+            rel = p[len(OUT) + 1:].replace(os.sep, "/")
+            limit = 600 if rel.startswith("images/frames/") else 500 if rel.startswith("images/avatar") else 400 if f.startswith("cover.") else 1200
+            before = os.path.getsize(p)
+            try:
+                im = Image.open(p); im.load()
+                resized = max(im.size) > limit
+                if resized:
+                    im.thumbnail((limit, limit), Image.LANCZOS)
+                if not resized and before < 150_000:
+                    continue
+                tmp = p + ".tmp"
+                if f.lower().endswith(".png"):
+                    im.save(tmp, "PNG", optimize=True)
+                elif f.lower().endswith(".webp"):
+                    im.save(tmp, "WEBP", quality=85)
+                else:
+                    im.convert("RGB").save(tmp, "JPEG", quality=85, optimize=True)
+                if resized or os.path.getsize(tmp) < before:
+                    saved += before - os.path.getsize(tmp); os.replace(tmp, p)
+                else:
+                    os.remove(tmp)
+            except Exception as e:
+                print("Không nén được", rel, e)
+    print(f"Đã nén ảnh, tiết kiệm khoảng {saved // 1024} KB")
+
+
 def main():
     now = datetime.now(timezone.utc)
     shutil.rmtree(OUT, ignore_errors=True)
@@ -94,6 +133,7 @@ def main():
         chapters[name] = [{"id": c, "title": t, "date": d.isoformat()} for c, t, d in pub]
         print(f"{name}: {len(pub)} chương đã đăng, {waiting} chương hẹn giờ")
 
+    optimize_images()
     stories.sort(key=lambda s: s["updated"], reverse=True)
     json.dump(stories, open(f"{OUT}/data/stories.json", "w", encoding="utf-8"), ensure_ascii=False)
     json.dump(chapters, open(f"{OUT}/data/chapters.json", "w", encoding="utf-8"), ensure_ascii=False)

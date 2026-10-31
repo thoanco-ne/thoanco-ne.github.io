@@ -83,7 +83,7 @@
     }
     if (frame) {
       firstLoadable(currentFrames(), function (url) {
-        if (url) { frame.src = url; frame.hidden = false; }
+        if (url) { frame.src = url; frame.hidden = false; frame.parentNode.classList.add("has-frame"); }
       });
     }
   }

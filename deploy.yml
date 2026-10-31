@@ -1,0 +1,30 @@
+name: Phát hành web lên Cloudflare Pages
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/30 * * * *"      # mỗi 30 phút kiểm tra chương hẹn giờ
+  workflow_dispatch:
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cài thư viện nén ảnh
+        run: pip install pillow
+      - name: Đóng gói web
+        run: python build.py
+      - name: Đẩy lên Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=${{ secrets.CLOUDFLARE_PROJECT }} --branch=main

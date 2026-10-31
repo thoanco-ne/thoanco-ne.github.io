@@ -137,3 +137,4 @@ i.tag{font-style:normal}
 .ps-quote canvas{display:block;width:100%;pointer-events:none}
 @media print{#reader{display:none!important}}
 .lock p{font-family:"Be Vietnam Pro",system-ui,sans-serif}
+.avatar.has-frame{border-color:transparent;box-shadow:none}

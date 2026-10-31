@@ -1,7 +1,7 @@
 /* thỏ ăn cỏ - home.js: trang chủ (truyện, chương mới, bình luận mới, review). */
 (function () {
   "use strict";
-  var FB_URL = "";            // dán link Facebook của bạn vào đây (để trống thì ẩn nút)
+  var FB_URL = "";            // dán link Facebook của bạn vào giữa hai dấu ngoặc kép, ví dụ "https://www.facebook.com/ten-ban"
   var $ = function (s) { return document.querySelector(s); };
   var stories = [], chap = {}, on = false;
 
@@ -17,7 +17,7 @@
   function chapterTitle(s, c) { var l = (chap[s] || []).filter(function (x) { return x.id === c; })[0]; return l ? l.title : c; }
   function note(box, t) { box.textContent = ""; box.appendChild(el("p", "muted", t)); }
 
-  if (FB_URL) $("#fb").href = FB_URL; else $("#fb").hidden = true;
+  if (FB_URL) $("#fb").href = FB_URL; else $("#fb").addEventListener("click", function (e) { e.preventDefault(); });   // chưa gắn link thì nút vẫn hiện nhưng chưa bấm đi đâu
 
   /* ---------- kệ truyện ---------- */
   function shelf(box, list) {
