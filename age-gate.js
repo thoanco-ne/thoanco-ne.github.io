@@ -35,19 +35,19 @@
   style.textContent =
     "#age-gate{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;" +
     "padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));" +
-    "background:rgba(10,12,8,.95);font-family:'Be Vietnam Pro',system-ui,sans-serif;-webkit-user-select:none;user-select:none}" +
-    "#age-gate .ag-card{width:min(420px,100%);background:#171913;color:#E0E8D3;border:1px solid #7c8c63;" +
+    "background:rgba(40,30,70,.85);font-family:'Be Vietnam Pro',system-ui,sans-serif;-webkit-user-select:none;user-select:none}" +
+    "#age-gate .ag-card{width:min(420px,100%);background:#fffafd;color:#4b4468;border:1px solid #cfc6ee;" +
     "border-radius:20px;padding:26px 22px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.5)}" +
     "#age-gate .ag-badge{width:72px;height:72px;margin:0 auto 10px;border-radius:50%;display:grid;place-items:center;" +
-    "background:#2E3325;border:1px dashed #7c8c63;font:600 24px 'Lora',serif;color:#E6CCD3}" +
-    "#age-gate h2{margin:0 0 8px;font:600 clamp(20px,5.2vw,24px)/1.3 'Lora',serif;color:#E0E8D3}" +
+    "background:#f6c9dc;border:2px solid #cfc6ee;font:800 24px 'Be Vietnam Pro',sans-serif;color:#8f7fd6}" +
+    "#age-gate h2{margin:0 0 8px;font:600 clamp(20px,5.2vw,24px)/1.3 'Be Vietnam Pro',sans-serif;color:#4b4468}" +
     "#age-gate p{margin:0 0 18px;font-size:15px;line-height:1.55}" +
     "#age-gate .ag-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}" +
     "#age-gate button{font:400 15px 'Be Vietnam Pro',sans-serif;cursor:pointer;border-radius:8px;padding:9px 20px;" +
-    "border:1px dashed #7c8c63;color:#E0E8D3;background:#2E3325}" +
-    "#age-gate button.ag-yes{background:#C799A7;color:#171913;border-color:#C799A7}" +
+    "border:2px solid #cfc6ee;color:#4b4468;background:#f6c9dc}" +
+    "#age-gate button.ag-yes{background:#f7d9a8;color:#4b4468;border-color:#f7d9a8;font-weight:700}" +
     "#age-gate button:hover{filter:brightness(1.07)}" +
-    "#age-gate button:focus-visible{outline:2px solid #E6CCD3;outline-offset:2px}" +
+    "#age-gate button:focus-visible{outline:2px solid #8f7fd6;outline-offset:2px}" +
     "html.ag-lock,html.ag-lock body{overflow:hidden!important}";
   document.head.appendChild(style);
 

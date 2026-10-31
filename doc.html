@@ -2,46 +2,52 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thỏ Ăn Cỏ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
+<script src="age-gate.js"></script>
 </head>
-<body class="reading">
+<body>
+<noscript><p style="text-align:center;padding:20px">Cần bật JavaScript để đọc truyện.</p></noscript>
 <div class="wrap">
   <nav class="bar">
-    <a class="btn" href="index.html">Trang chủ</a>
-    <a class="btn" id="btn-toc" href="#">Mục lục</a>
+    <a class="btn" href="index.html">🏠 trang chủ</a><a class="btn" id="btn-toc" href="#">📑 mục lục</a>
+    <span class="gap"></span>
+    <button class="btn" id="fs-m" type="button" aria-label="Chữ nhỏ lại" hidden>A−</button>
+    <button class="btn" id="fs-p" type="button" aria-label="Chữ to lên" hidden>A+</button>
   </nav>
-  <p class="story-name" id="story-name"></p>
+  <p class="sname" id="story-name"></p>
 
   <section id="reader" hidden>
-    <article class="page" id="story-card">
-      <div class="page-inner">
-        <h1 id="chapter-title"></h1>
-        <div id="secure-shadow-root"></div>
-      </div>
-    </article>
-    <div class="pager">
-      <a class="btn" id="btn-prev" href="#">‹ Chương trước</a>
-      <a class="btn" id="btn-next" href="#">Chương sau ›</a>
-    </div>
+    <article class="page" id="story-card"><div class="inner">
+      <h1 id="chapter-title"></h1>
+      <div id="secure-shadow-root"></div>
+      <div class="lock" id="lock" hidden><p id="lock-msg"></p><button class="btn" id="lock-btn" type="button">Tải lại trang</button></div>
+      <div class="lk"><button class="btn like" id="like" type="button">🥕 Thích chương này · <span id="like-n">0</span></button></div>
+    </div></article>
+    <div class="pager"><a class="btn" id="btn-prev" href="#">‹ chương trước</a><a class="btn" id="btn-next" href="#">chương sau ›</a></div>
+    <div class="box cbox"><h3 id="c-head">💬 Bình luận chương</h3><div class="scr" id="c-list"></div>
+      <p style="margin:10px 0 0"><button class="btn" id="c-open" type="button">Gửi bình luận</button></p></div>
   </section>
 
-  <section id="toc-view" hidden><div class="toc" id="toc"></div></section>
+  <section id="toc-view" hidden><div class="mt">
+    <div class="cardx"><h2>Giới thiệu truyện</h2>
+      <b id="i-title"></b><span id="i-meta" style="display:block;font-size:.85rem;color:var(--soft)"></span><div id="i-tags"></div>
+      <div id="i-desc" style="line-height:1.7"></div></div>
+    <div class="cardx"><h2 id="t-head">📑 Mục lục</h2><p class="sum" id="t-sum"></p>
+      <div class="chap hd"><span>Chương</span><span class="cn">Bình luận</span><span class="cn">Thích</span><em>Ngày đăng</em></div>
+      <div id="toc"></div></div>
+  </div></section>
   <p class="muted" id="message" hidden></p>
 </div>
 
-<!-- Bảng bình luận và cảm xúc cho từng đoạn -->
 <div class="psheet" id="psheet" hidden>
   <div class="ps-box" role="dialog" aria-modal="true" aria-labelledby="ps-title">
-    <div class="ps-head">
-      <h3 id="ps-title">Đoạn 1</h3>
-      <button class="ps-x" id="ps-close" type="button" aria-label="Đóng">✕</button>
-    </div>
+    <div class="ps-head"><h3 id="ps-title">Đoạn 1</h3><button class="ps-x" id="ps-close" type="button" aria-label="Đóng">✕</button></div>
     <div class="ps-body">
       <div class="ps-react" id="ps-react"></div>
       <p class="ps-quote" id="ps-quote"></p>
@@ -49,12 +55,9 @@
       <div id="ps-list"></div>
     </div>
     <form class="ps-form" id="ps-form" autocomplete="off">
-      <div class="ps-row">
-        <input id="ps-name" type="text" maxlength="30" placeholder="Tên (không bắt buộc)" aria-label="Tên của bạn">
-        <button class="ps-send" id="ps-send" type="submit">Gửi</button>
-      </div>
-      <textarea id="ps-body" maxlength="500" rows="2" placeholder="Viết bình luận…" aria-label="Bình luận"></textarea>
-      <input id="ps-site" class="chp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <input id="ps-name" type="text" maxlength="30" placeholder="Tên của bạn (bắt buộc)" aria-label="Tên của bạn"><div class="chips" id="ps-chips"></div>
+      <div class="ps-row"><textarea id="ps-body" maxlength="500" rows="2" placeholder="Viết bình luận…" aria-label="Bình luận" style="flex:1"></textarea><button class="ps-send" id="ps-send" type="submit">Gửi</button></div>
+      <input class="chp" id="ps-site" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p class="ps-status" id="ps-status" role="status"></p>
     </form>
   </div>
@@ -64,6 +67,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="config.js"></script>
 <script src="comments-core.js"></script>
+<script src="extras.js"></script>
 <script src="reader.js"></script>
 </body>
 </html>

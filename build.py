@@ -1,168 +1,103 @@
+#!/usr/bin/env python3
 """
-thỏ ăn cỏ - build.py
-Chạy tự động trên GitHub Actions mỗi lần bạn đăng bài (xem .github/workflows/deploy.yml).
+thỏ ăn cỏ - build.py  (GitHub Actions chạy tự động, xem .github/workflows/deploy.yml)
 
-Chữ trong file chương đã được đảo sẵn bởi file "tách có mã.html", nên script này KHÔNG đảo nữa. Việc nó làm:
-1. Chép fonts/secure-font.woff2 (font khớp với công cụ tách chương) vào bản phát hành.
-2. Chép trang web, ảnh (có nén bớt) và các thư mục truyện vào public/.
-3. Tạo data/chapters.json (ngày thêm từng chương) để khung "Chương mới cập nhật" tự cập nhật.
-Chạy thử trên máy:  pip install pillow  &&  python build.py
+Chữ chương đã được đảo sẵn bởi công cụ đăng truyện, nên script này không đảo nữa. Việc nó làm:
+1. Gom trang web, ảnh, font và các thư mục truyện vào public/.
+2. Chỉ đưa lên những chương đã ĐẾN GIỜ (dòng trong list.txt có dạng  c5: Tiêu đề | 2026-11-03T20:00+07:00 ).
+   Chương chưa đến giờ không có trong public/, nên không ai thấy được. Chương không ghi giờ thì đăng luôn.
+3. Tạo data/stories.json và data/chapters.json cho trang chủ.
+Chạy thử trên máy: python build.py
 """
-import datetime
-import json
-import os
-import shutil
-import subprocess
+import json, os, re, shutil, subprocess
+from datetime import datetime, timedelta, timezone
+
+OUT = "public"
+SYSTEM = {"images", "fonts", "data", "public", "node_modules"}
+SAFE = re.compile(r"^[A-Za-z0-9_-]{1,60}$")
+LINE = re.compile(r"^([A-Za-z0-9_-]+)\s*:\s*(.*?)(?:\s*\|\s*(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2})?\s*(?:Z|[+-]\d{2}:?\d{2})?))?\s*$")
+TIME = re.compile(r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2})?)\s*(Z|[+-]\d{2}:?\d{2})?$")
 
 
-# ---------- cấu hình ----------
-FONT_SOURCE = "fonts/secure-font.woff2"           # font lấy từ gói ZIP của công cụ tách chương
-OUTPUT_DIR = "public"
-FONTS_OUTPUT_DIR = os.path.join(OUTPUT_DIR, "fonts")
-SECURE_FONT_OUTPUT = os.path.join(FONTS_OUTPUT_DIR, "secure-font.woff2")
-
-def chapter_date(path):
-    """Ngày chương được thêm vào repo (lấy từ lịch sử git). Không có git thì dùng giờ sửa file."""
+def parse_time(s):
+    m = TIME.match(s.strip())
+    if not m:
+        return None
+    off = m.group(3) or "+07:00"          # không ghi múi giờ thì hiểu là giờ Việt Nam
+    off = "+00:00" if off == "Z" else (off if ":" in off else off[:3] + ":" + off[3:])
     try:
-        out = subprocess.run(["git", "log", "--diff-filter=A", "--format=%cI", "--", path],
-                             capture_output=True, text=True, check=True).stdout.split()
+        return datetime.fromisoformat(f"{m.group(1)}T{m.group(2)}{off}")
+    except ValueError:
+        return None
+
+
+def git_date(path):
+    try:
+        out = subprocess.run(["git", "log", "--diff-filter=A", "--follow", "--format=%aI", "--", path],
+                             capture_output=True, text=True).stdout.split()
         if out:
-            return out[-1]
+            return datetime.fromisoformat(out[-1])
     except Exception:
         pass
-    ts = os.path.getmtime(path)
-    return datetime.datetime.fromtimestamp(ts, datetime.timezone.utc).isoformat()
-
-
-def build_chapter_index(story_folders):
-    """Đọc list.txt của từng truyện và ghi data/chapters.json để khung 'Chương mới' tự cập nhật."""
-    index = {}
-    for folder in story_folders:
-        list_path = os.path.join(folder, "list.txt")
-        if not os.path.isfile(list_path):
-            continue
-        items = []
-        with open(list_path, "r", encoding="utf-8") as f:
-            for line in f.read().replace("\r", "").split("\n"):
-                line = line.strip()
-                if not line or line.startswith("# ") or ":" not in line:
-                    continue
-                cid, title = line.split(":", 1)
-                cid, title = cid.strip(), title.strip()
-                chap_file = os.path.join(folder, cid + ".txt")
-                if os.path.isfile(chap_file):
-                    items.append({"id": cid, "title": title, "date": chapter_date(chap_file)})
-        index[folder] = items
-    os.makedirs(os.path.join(OUTPUT_DIR, "data"), exist_ok=True)
-    with open(os.path.join(OUTPUT_DIR, "data", "chapters.json"), "w", encoding="utf-8") as f:
-        json.dump(index, f, ensure_ascii=False)
-    print("Đã tạo data/chapters.json cho:", list(index))
-
-
-# Kích thước tối đa (cạnh dài nhất, px) khi phát hành. Ảnh gốc trong repo giữ nguyên.
-IMG_MAX_DEFAULT = 1000   # bìa, ảnh đại diện, trang trí...: ô hiển thị chỉ vài trăm px nên dư sức nét
-IMG_MAX_FRAME = 1500     # khung bọc truyện (khung*.png)
-IMG_MAX_CURSOR = 32      # con trỏ chuột (cursor*.png) phải nhỏ mới hiển thị được
-
-
-def optimize_images():
-    """Tự thu nhỏ và nén ảnh trong images/ khi phát hành, bạn tải ảnh to cỡ nào cũng được."""
-    folder = os.path.join(OUTPUT_DIR, "images")
-    if not os.path.isdir(folder):
-        return
-    try:
-        import io
-        from PIL import Image, ImageOps
-    except ImportError:
-        print("Cảnh báo: chưa cài Pillow nên không tự nén ảnh.")
-        return
-    resample = getattr(getattr(Image, "Resampling", Image), "LANCZOS")
-    saved = 0
-    for root, _dirs, files in os.walk(folder):
-        for name in sorted(files):
-            low = name.lower()
-            if not low.endswith((".png", ".jpg", ".jpeg", ".webp")):
-                continue
-            path = os.path.join(root, name)
-            try:
-                before = os.path.getsize(path)
-                im = Image.open(path)
-                if getattr(im, "is_animated", False):
-                    continue                      # ảnh động: giữ nguyên
-                fmt = (im.format or "").upper()
-                im = ImageOps.exif_transpose(im)  # ảnh chụp từ điện thoại: xoay đúng chiều
-                limit = IMG_MAX_DEFAULT
-                if low.startswith("cursor"):
-                    limit = IMG_MAX_CURSOR
-                elif low.startswith("khung"):
-                    limit = IMG_MAX_FRAME
-                resized = max(im.size) > limit
-                if resized:
-                    im.thumbnail((limit, limit), resample)
-                buf = io.BytesIO()
-                if fmt == "JPEG":
-                    im.convert("RGB").save(buf, "JPEG", quality=85, optimize=True, progressive=True)
-                elif fmt == "WEBP":
-                    im.save(buf, "WEBP", quality=85)
-                else:
-                    im.save(buf, "PNG", optimize=True)
-                after = buf.tell()
-                if resized or after < before:
-                    with open(path, "wb") as f:
-                        f.write(buf.getvalue())
-                    saved += before - after
-                    print("Ảnh", name, ":", before // 1024, "KB ->", after // 1024, "KB", im.size)
-            except Exception as err:
-                print("Bỏ qua ảnh", name, "-", err)
-    print("Đã tiết kiệm khoảng", max(saved, 0) // 1024, "KB ảnh")
+    return datetime.fromtimestamp(os.path.getmtime(path), timezone.utc)
 
 
 def main():
-    if os.path.exists(OUTPUT_DIR):
-        shutil.rmtree(OUTPUT_DIR)
-    os.makedirs(FONTS_OUTPUT_DIR, exist_ok=True)
+    now = datetime.now(timezone.utc)
+    shutil.rmtree(OUT, ignore_errors=True)
+    os.makedirs(OUT + "/data")
+    for n in os.listdir("."):
+        if n.endswith((".html", ".css", ".js")) and n != "build.py":
+            shutil.copy(n, OUT)
+    if os.path.isfile("lich-dang.txt"):
+        shutil.copy("lich-dang.txt", OUT)
+    for d in ("images", "fonts"):
+        if os.path.isdir(d):
+            shutil.copytree(d, f"{OUT}/{d}")
 
-    if not os.path.isfile(FONT_SOURCE):
-        raise SystemExit("Thiếu fonts/secure-font.woff2 (lấy trong gói ZIP của công cụ tách chương).")
-    shutil.copy(FONT_SOURCE, SECURE_FONT_OUTPUT)
-
-    # Sao chép trang web
-    for name in os.listdir("."):
-        if name.endswith((".html", ".css", ".js")):
-            shutil.copy(name, os.path.join(OUTPUT_DIR, name))
-    for folder in ("images", "data"):
-        if os.path.isdir(folder):
-            shutil.copytree(folder, os.path.join(OUTPUT_DIR, folder), dirs_exist_ok=True)
-
-    optimize_images()
-
-    # Tự quét các thư mục truyện (thư mục nào có file .txt)
-    system_folders = {".git", ".github", "fonts", "public", "images", "data",
-                      "node_modules", "__pycache__"}
-    story_folders = []
-    for item in sorted(os.listdir(".")):
-        if os.path.isdir(item) and item not in system_folders:
-            if any(f.endswith(".txt") for f in os.listdir(item)):
-                story_folders.append(item)
-    print("Thư mục truyện tìm thấy:", story_folders)
-
-    for folder in story_folders:
-        out_folder = os.path.join(OUTPUT_DIR, folder)
-        os.makedirs(out_folder, exist_ok=True)
-        for file in sorted(os.listdir(folder)):
-            src = os.path.join(folder, file)
-            dst = os.path.join(out_folder, file)
-            if not file.endswith(".txt"):
-                if os.path.isfile(src):
-                    shutil.copy(src, dst)
+    stories, chapters = [], {}
+    for name in sorted(os.listdir(".")):
+        lp = os.path.join(name, "list.txt")
+        if name.startswith(".") or name in SYSTEM or not os.path.isfile(lp):
+            continue
+        if not SAFE.match(name):
+            print("Bỏ qua thư mục tên không hợp lệ:", name); continue
+        pub, waiting = [], 0
+        for line in open(lp, encoding="utf-8").read().splitlines():
+            m = LINE.match(line.strip())
+            src = m and f"{name}/{m.group(1)}.txt"
+            if not m or not os.path.isfile(src):
                 continue
-            shutil.copy(src, dst)   # chương đã được đảo sẵn, giữ nguyên
+            when = parse_time(m.group(3)) if m.group(3) else None
+            if when and when > now:
+                waiting += 1; continue
+            pub.append((m.group(1), m.group(2).strip(), when or git_date(src)))
+        if not pub:
+            continue
+        os.makedirs(f"{OUT}/{name}")
+        for cid, _, _ in pub:
+            shutil.copy(f"{name}/{cid}.txt", f"{OUT}/{name}/{cid}.txt")
+        open(f"{OUT}/{name}/list.txt", "w", encoding="utf-8").write("\n".join(f"{c}: {t}" for c, t, _ in pub))
+        info = {}
+        if os.path.isfile(f"{name}/info.json"):
+            shutil.copy(f"{name}/info.json", f"{OUT}/{name}/info.json")
+            try: info = json.load(open(f"{name}/info.json", encoding="utf-8"))
+            except Exception: print("info.json lỗi ở", name)
+        cover = next((f"{name}/cover.{e}" for e in ("jpg", "jpeg", "png", "webp") if os.path.isfile(f"{name}/cover.{e}")), None)
+        if cover:
+            shutil.copy(cover, f"{OUT}/{cover}")
+        g = info.get("genres", [])
+        stories.append({"id": name, "title": info.get("title") or name, "author": info.get("author", ""),
+                        "genres": g if isinstance(g, list) else [x.strip() for x in str(g).split(",") if x.strip()],
+                        "status": "done" if info.get("status") == "done" else "ongoing",
+                        "cover": cover, "count": len(pub), "updated": max(d for _, _, d in pub).isoformat()})
+        chapters[name] = [{"id": c, "title": t, "date": d.isoformat()} for c, t, d in pub]
+        print(f"{name}: {len(pub)} chương đã đăng, {waiting} chương hẹn giờ")
 
-    build_chapter_index(story_folders)
-
-    # Báo Pages không dùng Jekyll
-    open(os.path.join(OUTPUT_DIR, ".nojekyll"), "w").close()
-    print("Xong. Thư mục phát hành:", OUTPUT_DIR)
+    stories.sort(key=lambda s: s["updated"], reverse=True)
+    json.dump(stories, open(f"{OUT}/data/stories.json", "w", encoding="utf-8"), ensure_ascii=False)
+    json.dump(chapters, open(f"{OUT}/data/chapters.json", "w", encoding="utf-8"), ensure_ascii=False)
+    print("Xong. Thư mục phát hành:", OUT)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,8 @@
       ".read": true,
       ".indexOn": [
         "t",
-        "ck"
+        "ck",
+        "s"
       ],
       "$id": {
         ".write": "!data.exists() && newData.exists()",
@@ -51,6 +52,58 @@
             }
           }
         }
+      }
+    },
+    "likes": {
+      ".read": true,
+      "$s": {
+        ".validate": "$s.matches(/^[A-Za-z0-9_-]{1,60}$/)",
+        "$c": {
+          ".validate": "$c.matches(/^[A-Za-z0-9_-]{1,60}$/) && newData.isNumber() && newData.val() >= 0 && newData.val() <= 1000000 && ((!data.exists() && newData.val() == 1) || (data.exists() && (newData.val() == data.val() + 1 || (data.val() > 0 && newData.val() == data.val() - 1))))",
+          ".write": "newData.exists()"
+        }
+      }
+    },
+    "reviews": {
+      ".read": true,
+      ".indexOn": [
+        "t"
+      ],
+      "$id": {
+        ".write": "!data.exists() && newData.exists()",
+        ".validate": "newData.hasChildren(['name','s','stars','body','t']) && newData.child('name').isString() && newData.child('name').val().length >= 1 && newData.child('name').val().length <= 30 && newData.child('s').isString() && newData.child('s').val().matches(/^[A-Za-z0-9_-]{1,60}$/) && newData.child('stars').isNumber() && newData.child('stars').val() >= 1 && newData.child('stars').val() <= 5 && newData.child('stars').val() % 1 == 0 && newData.child('body').isString() && newData.child('body').val().length >= 1 && newData.child('body').val().length <= 500 && newData.child('t').val() == now",
+        "name": {
+          ".validate": true
+        },
+        "s": {
+          ".validate": true
+        },
+        "stars": {
+          ".validate": true
+        },
+        "body": {
+          ".validate": true
+        },
+        "t": {
+          ".validate": true
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "online": {
+      ".read": true,
+      "$id": {
+        ".write": true,
+        ".validate": "newData.isNumber()"
+      }
+    },
+    "stats": {
+      ".read": true,
+      "visits": {
+        ".write": "newData.exists()",
+        ".validate": "newData.isNumber() && newData.val() >= 0 && ((!data.exists() && newData.val() == 1) || (data.exists() && newData.val() == data.val() + 1))"
       }
     }
   }

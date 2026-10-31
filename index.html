@@ -2,26 +2,84 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Thỏ Ăn Cỏ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;700;800&family=Noto+Serif:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="theme.js"></script>
+<script src="age-gate.js"></script>
 </head>
 <body>
-<main class="home">
-  <header class="hero"><h1>Thỏ Ăn Cỏ</h1></header>
-  <section class="block" aria-labelledby="h-new">
-    <h2 id="h-new">Chương mới cập nhật</h2>
-    <ol class="latest" id="latest"></ol>
+<main class="home" style="max-width:980px;margin:0 auto;padding:14px 16px 90px">
+  <div class="topbar">[dòng chữ nhỏ trên cùng]</div>
+  <header class="shop">
+    <img class="awn" src="images/awning.jpg" alt="">
+    <div class="logo"><h1>thỏ ăn cỏ</h1></div>
+    <p class="sub">truyện edit · đọc cho vui, thương cho đậm</p>
+  </header>
+  <nav class="nav">
+    <a class="pill" href="index.html">🏠 trang chủ</a><a class="pill" href="#da-hoan">🌱 đã lấp hố</a>
+    <a class="pill" href="#dang-ra">⛏️ đang lấp hố</a><a class="pill" href="#cap-nhat">🔔 cập nhật</a><a class="pill" href="#review">⭐ review</a>
+  </nav>
+  <div class="board">
+    <div class="avatar"><img id="avatar-photo" alt="Ảnh đại diện"><img id="avatar-frame" alt="" hidden></div>
+    <section class="card"><h2>Giới thiệu</h2>
+      <p>Bạn có thể gọi mình là <b class="hl">[Tên gọi 1]</b> hoặc <b class="hl">[Tên gọi 2]</b>, cứ thân mật nha.</p>
+      <p>[Tuổi] | [Chiều cao] | [Nghề nghiệp] | [Sở thích]</p>
+      <p>Web đăng truyện edit, ai thích thì ghé đọc. Truyện thuộc về tác giả gốc, bản edit chỉ để chia sẻ phi thương mại.</p>
+      <img class="m1" src="images/mascot1.png" alt="">
+    </section>
+    <aside class="col-r"><b>links</b><a class="pill" id="fb" href="#" target="_blank" rel="noopener">Facebook</a></aside>
+  </div>
+  <aside class="sched" id="sched" hidden><b>📌 Lịch đăng truyện</b><div id="sched-text"></div></aside>
+  <section class="shelf"><h2 class="ribbon" id="da-hoan">🌱 Đã lấp hố</h2><div class="sgrid" id="shelf-done"></div></section>
+  <section class="shelf"><h2 class="ribbon" id="dang-ra">⛏️ Đang lấp hố</h2><div class="sgrid" id="shelf-on"></div></section>
+  <div class="dual" id="cap-nhat">
+    <div class="box"><h3>🔔 Chương mới cập nhật</h3><div class="scr" id="latest"></div></div>
+    <div class="box"><h3>💬 Bình luận mới</h3><div class="scr" id="recent"></div>
+      <p style="margin:10px 0 0"><button class="btn" id="open-cmt" type="button">✏️ Viết bình luận</button></p></div>
+  </div>
+  <section class="box rv" id="review"><h3>⭐ Review truyện</h3>
+    <div class="rvgrid">
+      <form id="rv-form" autocomplete="off">
+        <label for="rv-story">Chọn truyện</label><select id="rv-story"></select>
+        <label>Chấm sao</label>
+        <div class="stars" id="stars" role="radiogroup" aria-label="Số sao"></div>
+        <label for="rv-name">Tên của bạn (bắt buộc)</label>
+        <input id="rv-name" type="text" maxlength="30" placeholder="Tên của bạn"><div class="chips" id="rv-chips"></div>
+        <label for="rv-text">Cảm nhận</label>
+        <textarea id="rv-text" maxlength="500" rows="4" placeholder="Viết cảm nhận của bạn…"></textarea>
+        <input class="chp" id="rv-site" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <button class="btn" id="rv-send" type="submit">Gửi review</button>
+        <p class="status" id="rv-status" role="status"></p>
+      </form>
+      <div class="scr tall" id="rv-list"></div>
+    </div>
   </section>
-  <section class="block" aria-labelledby="h-all">
-    <h2 id="h-all">Truyện</h2>
-    <div class="shelf" id="shelf"></div>
-  </section>
+  <div class="stats"><span>🥕 <b id="st-online">—</b> người đang trồng cà rốt</span><span>👣 <b id="st-visits">—</b> lượt ghé thăm</span></div>
+  <footer class="foot"><img src="images/mascot2.png" alt=""><span>thỏ ăn cỏ · làm bởi [tên bạn]</span></footer>
 </main>
+
+<div class="psheet" id="csheet" hidden>
+  <div class="ps-box" role="dialog" aria-modal="true" aria-labelledby="cs-title">
+    <div class="ps-head"><h3 id="cs-title">Viết bình luận</h3><button class="ps-x" id="cs-close" type="button" aria-label="Đóng">✕</button></div>
+    <form class="ps-form" id="cs-form" autocomplete="off">
+      <input id="cs-name" type="text" maxlength="30" placeholder="Tên của bạn (bắt buộc)" aria-label="Tên của bạn"><div class="chips" id="cs-chips"></div>
+      <textarea id="cs-body" maxlength="500" rows="3" placeholder="Viết bình luận…" aria-label="Bình luận"></textarea>
+      <input class="chp" id="cs-site" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="ps-row"><span class="ps-status" id="cs-status" role="status" style="flex:1"></span><button class="ps-send" id="cs-send" type="submit">Gửi</button></div>
+    </form>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<script src="comments-core.js"></script>
+<script src="avatar.js"></script>
+<script src="extras.js"></script>
 <script src="home.js"></script>
 </body>
 </html>
