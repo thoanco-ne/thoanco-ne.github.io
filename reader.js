@@ -60,10 +60,10 @@
     [].concat(info.genres || []).forEach(function (g) { $("#i-tags").appendChild(el("i", "tag", g)); });
     String(info.desc || "").split(/\n\s*\n/).forEach(function (p) { if (p.trim()) { var e = el("p", "", p.trim()); e.style.whiteSpace = "pre-line"; $("#i-desc").appendChild(e); } });
     $("#t-head").textContent = "📑 Mục lục (" + chapters.length + " chương)";
-    var box = $("#toc"), cm = {}, lk = {};
+    var box = $("#toc"), cm = {}, lk = {}, tspans = {};
     chapters.forEach(function (ch) {
       var a = el("a", "chap"); a.href = link(ch.id);
-      a.appendChild(el("span", "", ch.title + (readGet()[ch.id] ? " 👀" : "")));   // 👀 = chương đã mở đọc
+      tspans[ch.id] = el("span"); a.appendChild(tspans[ch.id]);
       var c = el("span", "cn", "💬 0"), l = el("span", "cn", "🥕 0"); c.setAttribute("data-c", ch.id); l.setAttribute("data-l", ch.id);
       a.appendChild(c); a.appendChild(l);
       a.appendChild(el("em", "", dates[ch.id] ? new Date(dates[ch.id]).toLocaleDateString("vi-VN") : ""));
@@ -80,6 +80,11 @@
     }
     paint();
     if (TAC.init()) { TAC.countByStory(STORY, function (m) { cm = m; paint(); }); TAC.watchLikes(STORY, function (m) { lk = m; paint(); }); }
+    function eyes() { var rd = readGet(); chapters.forEach(function (ch) { tspans[ch.id].textContent = ch.title + (rd[ch.id] ? " 👀" : ""); }); }   // 👀 = chương đã mở đọc
+    eyes();
+    window.addEventListener("pageshow", eyes);                       // quay lại bằng nút Back trên điện thoại (trang lấy từ bộ nhớ đệm)
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) eyes(); });
+    window.addEventListener("focus", eyes);
     $("#toc-view").hidden = false;
   }
 
