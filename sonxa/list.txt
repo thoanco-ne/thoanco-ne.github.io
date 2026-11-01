@@ -1,0 +1,11 @@
+c1: Chương 1: Vảy rắn đen
+c2: Chương 2 Hắn muốn Xà Dã phải chết
+c3: Chương 3: Lời mời của chủ nhân
+c4: Chương 4 Giống đang tìm bạn tình | 2026-11-02T22:00:00+09:00
+c5: Chương 5: Cậu đã từng ăn thịt rắn chưa | 2026-11-03T22:00:00+09:00
+c6: Chương 6 Ta thích rắn | 2026-11-04T22:00:00+09:00
+c7: Chương 7 Có phải đã làm chuyện gì hổ thẹn không | 2026-11-05T22:00:00+09:00
+c8: Chương 8: Ta có một người rất chán ghét | 2026-11-06T22:00:00+09:00
+c9: Chương 9 Ngươi cũng sắp rồi, bạn nhỏ | 2026-11-07T22:00:00+09:00
+c10: Chương 10: Ở lại, với tôi | 2026-11-08T22:00:00+09:00
+c11: Chương 11: Bộ dạng này của tôi kỳ lạ lắm sao? | 2026-11-09T22:00:00+09:00
