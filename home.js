@@ -1,7 +1,7 @@
 /* thỏ ăn cỏ - home.js: trang chủ (truyện, chương mới, bình luận mới, review). */
 (function () {
   "use strict";
-  var FB_URL = "";            // dán link Facebook của bạn vào giữa hai dấu ngoặc kép, ví dụ "https://www.facebook.com/ten-ban"
+  var FB_URL = "https://www.facebook.com/tho.anco.26";            // dán link Facebook của bạn vào giữa hai dấu ngoặc kép, ví dụ "https://www.facebook.com/ten-ban"
   var $ = function (s) { return document.querySelector(s); };
   var stories = [], chap = {}, on = false;
 
