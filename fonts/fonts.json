@@ -1,24 +1,24 @@
 [
  {
+  "id": "dejavu-serif",
+  "name": "DejaVu Serif",
+  "file": "fonts/dejavu-serif.woff"
+ },
+ {
   "id": "lora",
-  "name": "Lora (chữ có chân, mềm)",
+  "name": "Lora",
   "file": "fonts/lora.woff"
  },
  {
   "id": "times",
-  "name": "Liberation Serif (có chân, giống Times)",
+  "name": "Liberation Serif",
   "file": "fonts/times.woff",
   "scale": 1.1
  },
  {
   "id": "calibri",
-  "name": "Carlito (không chân, giống Calibri)",
+  "name": "Carlito",
   "file": "fonts/calibri.woff",
   "scale": 1.12
- },
- {
-  "id": "sans-to",
-  "name": "Sans to rõ (không chân)",
-  "file": "fonts/sans-to.woff"
  }
 ]

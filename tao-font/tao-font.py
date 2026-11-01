@@ -3,7 +3,7 @@
 Tạo "font bảo mật" từ một font thường để người đọc chọn thêm font chữ mà vẫn giữ nguyên cơ chế đảo chữ.
 
 Cách dùng (cần Python và:  pip install fonttools):
-    python tao-font/tao-font.py duong-dan/Font.ttf "Tên hiển thị" ten-ngan
+    python tao-font/tao-font.py duong-dan/Font.ttf "Tên font" ten-ngan
 
 Kết quả: fonts/ten-ngan.woff và dòng mới trong fonts/fonts.json. Đẩy hai file đó lên GitHub là web có thêm font.
 Font bảo mật dùng cùng bảng đảo chữ (tao-font/char-map.json) với công cụ đăng truyện, nên chương đã đăng không cần làm lại.
