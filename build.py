@@ -59,7 +59,12 @@ def optimize_images():
             limit = 600 if rel.startswith("images/frames/") else 500 if rel.startswith("images/avatar") else 400 if f.startswith("cover.") else 1200
             before = os.path.getsize(p)
             try:
-                im = Image.open(p); im.load()
+                im = Image.open(p)
+                if getattr(im, "is_animated", False):                # ảnh động: giữ nguyên, nén sẽ làm mất chuyển động
+                    if before > 1_000_000:
+                        print(f"Cảnh báo: {rel} là ảnh động nặng {before // 1024} KB, nên làm nhẹ dưới 1 MB cho người đọc tải nhanh.")
+                    continue
+                im.load()
                 resized = max(im.size) > limit
                 if resized:
                     im.thumbnail((limit, limit), Image.LANCZOS)
@@ -119,16 +124,22 @@ def main():
         open(f"{OUT}/{name}/list.txt", "w", encoding="utf-8").write("\n".join(f"{c}: {t}" for c, t, _ in pub))
         info = {}
         if os.path.isfile(f"{name}/info.json"):
-            shutil.copy(f"{name}/info.json", f"{OUT}/{name}/info.json")
             try: info = json.load(open(f"{name}/info.json", encoding="utf-8"))
             except Exception: print("info.json lỗi ở", name)
+        try: total = int(info.get("total") or 0)
+        except (TypeError, ValueError): total = 0
+        finished = info.get("status") == "done" or (total > 0 and len(pub) >= total)   # đăng đủ tổng số chương thì tự hoàn
+        if finished and info.get("status") != "done":
+            print(f"{name}: đã đăng đủ {total} chương, tự chuyển sang Đã lấp hố")
+        info["status"] = "done" if finished else "ongoing"
+        json.dump(info, open(f"{OUT}/{name}/info.json", "w", encoding="utf-8"), ensure_ascii=False)
         cover = next((f"{name}/cover.{e}" for e in ("jpg", "jpeg", "png", "webp") if os.path.isfile(f"{name}/cover.{e}")), None)
         if cover:
             shutil.copy(cover, f"{OUT}/{cover}")
         g = info.get("genres", [])
         stories.append({"id": name, "title": info.get("title") or name, "author": info.get("author", ""),
                         "genres": g if isinstance(g, list) else [x.strip() for x in str(g).split(",") if x.strip()],
-                        "status": "done" if info.get("status") == "done" else "ongoing",
+                        "status": info["status"],
                         "cover": cover, "count": len(pub), "updated": max(d for _, _, d in pub).isoformat()})
         chapters[name] = [{"id": c, "title": t, "date": d.isoformat()} for c, t, d in pub]
         print(f"{name}: {len(pub)} chương đã đăng, {waiting} chương hẹn giờ")
