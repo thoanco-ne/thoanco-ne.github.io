@@ -1,7 +1,7 @@
 /* thỏ ăn cỏ - home.js: trang chủ (truyện, chương mới, bình luận mới, review). */
 (function () {
   "use strict";
-  var FB_URL = "https://www.facebook.com/tho.anco.26";            // dán link Facebook của bạn vào giữa hai dấu ngoặc kép, ví dụ "https://www.facebook.com/ten-ban"
+  var FB_URL = "";            // dán link Facebook của bạn vào giữa hai dấu ngoặc kép, ví dụ "https://www.facebook.com/ten-ban"
   var $ = function (s) { return document.querySelector(s); };
   var stories = [], chap = {}, on = false;
 
@@ -26,13 +26,18 @@
     list.forEach(function (s) {
       var a = el("a", "story"); a.href = link(s.id);
       var cv = el("div", "cover");
-      if (s.cover) { var im = el("img"); im.src = s.cover; im.alt = ""; im.loading = "lazy"; cv.appendChild(im); } else cv.textContent = "ảnh bìa";
+      if (s.cover) { cv.className = "cover has-img"; var im = el("img"); im.src = s.cover; im.alt = ""; im.loading = "lazy"; cv.appendChild(im); } else cv.textContent = "ảnh bìa";
       var d = el("div"); d.appendChild(el("b", "", s.title));
-      d.appendChild(el("span", "", "✍ " + (s.author || "—") + " · 📖 " + s.count + " chương"));
-      (s.genres || []).forEach(function (g) { d.appendChild(el("i", "tag", g)); });
+      d.appendChild(el("span", "", "✍ " + (s.author || "—") + " · 📖 " + (s.total > s.count ? s.count + "/" + s.total : s.count) + " chương"));
+      (s.genres || []).forEach(function (g) { var tg = el("i", "tagf", g); tg.setAttribute("data-tag", g); d.appendChild(tg); });   // bấm vào thẻ để xem truyện cùng thể loại
       a.appendChild(cv); a.appendChild(d); box.appendChild(a);
     });
   }
+  function tagClick(e) {
+    var t = e.target.closest && e.target.closest("[data-tag]");
+    if (t) { e.preventDefault(); location.href = "tag.html?tag=" + encodeURIComponent(t.getAttribute("data-tag")); }
+  }
+  $("#shelf-done").addEventListener("click", tagClick); $("#shelf-on").addEventListener("click", tagClick);
   function fillShelves() {
     shelf($("#shelf-done"), stories.filter(function (s) { return s.status === "done"; }));
     shelf($("#shelf-on"), stories.filter(function (s) { return s.status !== "done"; }));

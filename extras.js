@@ -21,6 +21,9 @@
     box.appendChild(mk("Đổi nền sáng / tối", "🌓", function () { window.TACTheme && TACTheme.toggle(); }));
     box.appendChild(mk("Xuống cuối trang", "▼", function () { scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" }); }));
     document.body.appendChild(box);
+    var idle;
+    function wake() { box.classList.remove("idle"); clearTimeout(idle); idle = setTimeout(function () { box.classList.add("idle"); }, 2200); }
+    window.addEventListener("scroll", wake, { passive: true }); window.addEventListener("touchstart", wake, { passive: true }); wake();
   }
   if (document.body) mount(); else document.addEventListener("DOMContentLoaded", mount);
 })();

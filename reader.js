@@ -12,7 +12,7 @@
   var active = null, comments = [], reactions = {}, likes = {}, on = false;
   var fs = parseInt(localStorage.getItem("tac-fs"), 10) || 18;
   /* font chữ: mỗi font là một "font bảo mật" dùng cùng bảng đảo chữ (xem tao-font/tao-font.py) */
-  var FONTS = [{ id: "mac-dinh", name: "Mặc định (DejaVu Serif)", file: "", family: "SecuredFont" }];
+  var FONTS = [{ id: "mac-dinh", name: "Mặc định", file: "", family: "SecuredFont" }];
   var fontId = localStorage.getItem("tac-font") || "mac-dinh";
   function curFont() { return FONTS.filter(function (f) { return f.id === fontId; })[0] || FONTS[0]; }
   function loadFont(f) {
@@ -75,11 +75,12 @@
   /* ---------- mục lục: khung giới thiệu + khung danh sách ---------- */
   function showToc() {
     document.title = (info.title || "Mục lục") + " · Thỏ Ăn Cỏ";
+    var cn = info.total > chapters.length ? chapters.length + "/" + info.total : chapters.length;   // 3/60 khi chưa đăng đủ
     $("#i-title").textContent = info.title || STORY;
-    $("#i-meta").textContent = "✍ " + (info.author || "—") + " · 📖 " + chapters.length + " chương · " + (info.status === "done" ? "🌱 Đã lấp hố" : "⛏️ Đang lấp hố");
-    [].concat(info.genres || []).forEach(function (g) { $("#i-tags").appendChild(el("i", "tag", g)); });
+    $("#i-meta").textContent = "✍ " + (info.author || "—") + " · 📖 " + cn + " chương · " + (info.status === "done" ? "🌱 Đã lấp hố" : "⛏️ Đang lấp hố");
+    [].concat(info.genres || []).forEach(function (g) { { var ta = el("a", "tagf", g); ta.href = "tag.html?tag=" + encodeURIComponent(g); $("#i-tags").appendChild(ta); } });
     String(info.desc || "").split(/\n\s*\n/).forEach(function (p) { if (p.trim()) { var e = el("p", "", p.trim()); e.style.whiteSpace = "pre-line"; $("#i-desc").appendChild(e); } });
-    $("#t-head").textContent = "📑 Mục lục (" + chapters.length + " chương)";
+    $("#t-head").textContent = "📑 Mục lục (" + cn + " chương)";
     var box = $("#toc"), cm = {}, lk = {}, tspans = {};
     chapters.forEach(function (ch) {
       var a = el("a", "chap"); a.href = link(ch.id);
@@ -123,7 +124,7 @@
   var PC_CSS =
     "#story-content{width:100%;color:var(--ink)}" +
     "canvas{display:block;width:100%;margin:0 0 .2rem;user-select:none;-webkit-user-select:none;pointer-events:none}" +
-    ".pbar{display:flex;justify-content:flex-end;margin:0 0 1.1rem;min-height:26px;user-select:none;-webkit-user-select:none}" +
+    ".pbar{display:flex;justify-content:flex-end;margin:0 0 .6rem;min-height:24px;user-select:none;-webkit-user-select:none}" +
     ".pc{font:700 .78rem 'Be Vietnam Pro',system-ui,sans-serif;cursor:pointer;padding:.35em .85em;border-radius:99px;border:2px solid var(--lilac);background:var(--paper);color:var(--ink)}" +
     ".pc:hover,.pc.has{background:var(--pink)}";
 
@@ -291,7 +292,7 @@
   }
   function paint(cv, text, W, maxLines, size) {
     size = size * (curFont().scale || 1);   // mỗi font to nhỏ khác nhau, "scale" trong fonts/fonts.json để cân lại
-    var lh = Math.round(size * 1.9), font = size + "px '" + curFont().family + "','Noto Serif',serif";
+    var lh = Math.round(size * 1.75), font = size + "px '" + curFont().family + "','Noto Serif',serif";
     var col = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim() || "#4b4468";
     var m = document.createElement("canvas").getContext("2d"); m.font = font;
     var lines = wrapText(m, text, W);
@@ -392,7 +393,7 @@
 
   /* ---------- khởi động ---------- */
   if (!STORY || !SAFE.test(STORY) || (CHAPTER && !SAFE.test(CHAPTER))) { say("Đường dẫn chưa đúng. Hãy quay lại trang chủ và chọn truyện."); return; }
-  $("#btn-toc").href = link("");
+  $("#btn-toc").href = link(""); $("#btn-toc2").href = link("");
   if (window.TAC && TAC.init()) { TAC.presence(); TAC.countVisit(); }
   if (window.TAC) drawNames = TAC.bindName($("#ps-name"), $("#ps-chips"));
   loadAll().then(function () { return CHAPTER ? showChapter() : showToc(); })

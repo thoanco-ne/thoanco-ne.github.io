@@ -56,7 +56,7 @@ def optimize_images():
                 continue
             p = os.path.join(root, f)
             rel = p[len(OUT) + 1:].replace(os.sep, "/")
-            limit = 600 if rel.startswith("images/frames/") else 500 if rel.startswith("images/avatar") else 400 if f.startswith("cover.") else 1200
+            limit = 600 if rel.startswith("images/frames/") else 500 if rel.startswith("images/avatar") else 640 if f.startswith("cover.") else 1200
             before = os.path.getsize(p)
             try:
                 im = Image.open(p)
@@ -140,7 +140,7 @@ def main():
         stories.append({"id": name, "title": info.get("title") or name, "author": info.get("author", ""),
                         "genres": g if isinstance(g, list) else [x.strip() for x in str(g).split(",") if x.strip()],
                         "status": info["status"],
-                        "cover": cover, "count": len(pub), "updated": max(d for _, _, d in pub).isoformat()})
+                        "cover": cover, "count": len(pub), "total": total, "updated": max(d for _, _, d in pub).isoformat()})
         chapters[name] = [{"id": c, "title": t, "date": d.isoformat()} for c, t, d in pub]
         print(f"{name}: {len(pub)} chương đã đăng, {waiting} chương hẹn giờ")
 

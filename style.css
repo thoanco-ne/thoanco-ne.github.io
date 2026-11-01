@@ -146,3 +146,52 @@ i.tag{font-style:normal}
 .page .inner{background:var(--read-bg)}
 #font-sel{font:inherit;font-weight:700;color:var(--ink);background:var(--paper);border:2px solid var(--lilac);border-radius:99px;padding:8px 14px;max-width:190px;cursor:pointer}
 #font-sel[hidden]{display:none}
+
+/* thẻ thể loại có khung viền, bấm vào để xem các truyện cùng thể loại */
+.tagf{display:inline-block;margin:6px 6px 0 0;padding:3px 12px;border:2px solid var(--lilac);border-radius:99px;background:var(--paper);color:var(--ink);font-size:.8rem;font-weight:700;font-style:normal;cursor:pointer}
+a.tagf:hover,i.tagf:hover,.tagf.on{background:var(--pink)}
+.tagrow{display:flex;flex-wrap:wrap;gap:0}
+/* hàng nút chương trước / mục lục / chương sau */
+.pager{align-items:center;gap:8px}
+@media(max-width:480px){.pager .btn{padding:8px 11px;font-size:.86rem}}
+.pager .btn{white-space:nowrap;text-align:center}
+@media(max-width:430px){.pager{gap:5px}.pager .btn{flex:1 1 auto;min-width:0;padding:8px 5px;font-size:.76rem;overflow:hidden;text-overflow:ellipsis}}
+@media(max-width:350px){.pager .btn{padding:8px 3px;font-size:.7rem}}
+
+/* ---- ảnh bìa: khung to hơn, hiện trọn ảnh ---- */
+.cover{flex:0 0 100px}
+.cover.has-img{aspect-ratio:auto;display:block;align-self:flex-start;border-style:solid}
+.cover.has-img img{width:100%;height:auto;display:block;object-fit:contain}
+.sgrid .cover{flex-basis:100px}
+@media(max-width:899px){.sgrid .cover{flex-basis:82px}}
+@media(max-width:759px){.sgrid .cover{flex-basis:96px}}
+@media(max-width:559px){.sgrid .cover{flex-basis:100px}}
+/* ---- khối giới thiệu trang chủ: căn chỉnh lại ---- */
+.board{grid-template-columns:210px 1fr 170px}
+.avatar{margin:5px 20px 0}.avatar.has-frame{margin-top:20px}
+.col-r{padding-top:16px}.col-r .pill{width:100%;text-align:center}
+.sched{margin:22px 0 0 228px;max-width:440px}
+@media(max-width:700px){.board{grid-template-columns:1fr}.avatar,.avatar.has-frame{margin:10px auto}.col-r{padding-top:0}.sched{margin:20px auto 0}}
+/* ---- khoảng cách dòng gọn hơn ---- */
+.cbox{margin-top:10px}.cbox h3{margin-bottom:4px}
+.box .scr>p.muted,.cbox p.muted{margin:4px 0 8px}
+.chap{padding:7px 12px}
+/* ---- phần giới thiệu truyện: khung có thanh cuộn ---- */
+#i-desc{max-height:210px;overflow-y:auto;margin-top:12px;padding:10px 14px;border:2px solid var(--lilac);border-radius:16px;background:var(--paper);scrollbar-width:thin;scrollbar-color:var(--lilac) transparent}
+#i-desc:empty{display:none}
+#i-desc p{margin:0 0 .6em;line-height:1.6}#i-desc p:last-child{margin-bottom:0}
+/* ---- nút lên / sáng tối / xuống ---- */
+.jump{transition:opacity .3s}.jump.idle{opacity:.3}.jump:hover{opacity:1}
+@media(max-width:700px){
+  .jump{right:0;bottom:calc(76px + env(safe-area-inset-bottom,0px));gap:0;border:2px solid var(--lilac);border-right:0;border-radius:16px 0 0 16px;background:var(--paper);overflow:hidden}
+  .jump button{width:36px;height:38px;padding:0;border:0;border-radius:0;background:transparent;font-size:15px;line-height:1;display:grid;place-items:center}
+  .jump button+button{border-top:1px solid var(--lilac)}
+}
+
+/* ---- căn lại ảnh đại diện: viền ngoài cùng thẳng hàng với mép nội dung ---- */
+.board{grid-template-columns:200px 1fr 170px}
+.avatar{margin:5px 25px 0 5px}.avatar.has-frame{margin:20px 10px 0 20px}
+@media(max-width:700px){.board{grid-template-columns:1fr}.avatar{margin:10px auto}.avatar.has-frame{margin:24px auto}}
+/* ---- thanh nút trên cùng của trang đọc, gọn hơn trên điện thoại ---- */
+@media(max-width:700px){.wrap .bar{padding-right:0}}
+@media(max-width:480px){#font-sel{max-width:132px;padding:8px 10px}.bar .btn{padding:8px 13px}}
