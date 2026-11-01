@@ -11,6 +11,17 @@
   var chapters = [], info = {}, dates = {}, shadow = null, paras = [];
   var active = null, comments = [], reactions = {}, likes = {}, on = false;
   var fs = parseInt(localStorage.getItem("tac-fs"), 10) || 18;
+  /* font chữ: mỗi font là một "font bảo mật" dùng cùng bảng đảo chữ (xem tao-font/tao-font.py) */
+  var FONTS = [{ id: "mac-dinh", name: "Mặc định (DejaVu Serif)", file: "", family: "SecuredFont" }];
+  var fontId = localStorage.getItem("tac-font") || "mac-dinh";
+  function curFont() { return FONTS.filter(function (f) { return f.id === fontId; })[0] || FONTS[0]; }
+  function loadFont(f) {
+    if (!f.ready) {
+      if (!f.file) f.ready = document.fonts && document.fonts.load ? document.fonts.load("18px SecuredFont", "Aáệ") : Promise.resolve();
+      else { var ff = new FontFace(f.family, "url(" + f.file + ")"); document.fonts.add(ff); f.ready = ff.load(); }
+    }
+    return Promise.resolve(f.ready).catch(function () {});
+  }
   var RT = [{ t: "tim", e: "❤️", l: "Thả tim" }, { t: "khoc", e: "😢", l: "Khóc" }, { t: "gian", e: "😡", l: "Tức giận" }, { t: "cuoi", e: "😂", l: "Cười" }];
 
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
@@ -48,8 +59,9 @@
   function loadAll() {
     return Promise.all([
       fetch(STORY + "/list.txt", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error("Chưa có truyện này."); return r.text(); }),
-      getJson(STORY + "/info.json"), getJson("data/chapters.json")
+      getJson(STORY + "/info.json"), getJson("data/chapters.json"), getJson("fonts/fonts.json")
     ]).then(function (a) {
+      (a[3] || []).forEach(function (f) { FONTS.push({ id: f.id, name: f.name, file: f.file, family: "TAC-" + f.id, scale: f.scale || 1 }); });
       a[0].split(/\r?\n/).forEach(function (line) {
         var i = line.indexOf(":"); line = line.trim();
         if (line && i > 0) chapters.push({ id: line.slice(0, line.indexOf(":")).trim(), title: line.slice(line.indexOf(":") + 1).trim() });
@@ -144,6 +156,15 @@
       });
       shadow.appendChild(content); contentEl = content;
       $("#reader").hidden = false; $("#fs-m").hidden = false; $("#fs-p").hidden = false; setSize(0);
+      var sel = $("#font-sel");
+      if (FONTS.length > 1) {
+        FONTS.forEach(function (f) { var o = el("option", "", f.name); o.value = f.id; sel.appendChild(o); });
+        sel.value = curFont().id; sel.hidden = false;
+        sel.addEventListener("change", function () {
+          fontId = sel.value; localStorage.setItem("tac-font", fontId);
+          loadFont(curFont()).then(render);
+        });
+      }
 
       var prev = $("#btn-prev"), next = $("#btn-next");
       if (idx > 0) prev.href = link(chapters[idx - 1].id); else prev.setAttribute("aria-disabled", "true");
@@ -250,7 +271,7 @@
   });
 
   /* ---------- chữ vẽ lên canvas + hình mờ + phát hiện tiện ích / chụp màn hình ---------- */
-  var WATERMARK = true;                 // đổi thành false nếu không muốn hình mờ trên chữ
+  var WATERMARK = false;                // đổi thành true nếu muốn bật hình mờ mã người đọc trên chữ
   var contentEl = null, locked = false, hard = false, strikes = 0, down = {}, vid = "", stamp = "";
   try { vid = localStorage.getItem("tac-vid") || ""; if (!vid) { vid = Math.random().toString(36).slice(2, 8); localStorage.setItem("tac-vid", vid); } } catch (e) { vid = "khach"; }
   (function () { var d = new Date(); stamp = ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2); })();
@@ -269,7 +290,8 @@
     return lines.length ? lines : [""];
   }
   function paint(cv, text, W, maxLines, size) {
-    var lh = Math.round(size * 1.9), font = size + "px SecuredFont,'Noto Serif',serif";
+    size = size * (curFont().scale || 1);   // mỗi font to nhỏ khác nhau, "scale" trong fonts/fonts.json để cân lại
+    var lh = Math.round(size * 1.9), font = size + "px '" + curFont().family + "','Noto Serif',serif";
     var col = getComputedStyle(document.documentElement).getPropertyValue("--ink").trim() || "#4b4468";
     var m = document.createElement("canvas").getContext("2d"); m.font = font;
     var lines = wrapText(m, text, W);
@@ -315,7 +337,7 @@
     else strikes = 0;
   }
   function startReader() {
-    var ready = document.fonts && document.fonts.load ? document.fonts.load("18px SecuredFont", "Aáệ").catch(function () {}) : Promise.resolve();
+    var ready = loadFont(curFont());
     var saved = lastGet(), want = params.get("tiep") && saved && saved.c === CHAPTER ? saved.p : 0;
     lastSet(CHAPTER, want);                                          // mở chương nào thì đó là chương đang đọc
     ready.then(function () {

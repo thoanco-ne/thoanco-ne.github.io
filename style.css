@@ -140,3 +140,9 @@ i.tag{font-style:normal}
 .avatar.has-frame{border-color:transparent;box-shadow:none}
 .mt .go{display:flex;gap:10px;flex-wrap:wrap;padding:14px}.go .btn{flex:1 1 150px;text-align:center;min-width:0}
 .go .gs{display:block;font-size:.72rem;font-weight:500;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+:root{--read-bg:rgba(253,247,230,.96)}
+:root[data-theme="dark"]{--read-bg:rgba(36,31,62,.9)}
+.page .inner{background:var(--read-bg)}
+#font-sel{font:inherit;font-weight:700;color:var(--ink);background:var(--paper);border:2px solid var(--lilac);border-radius:99px;padding:8px 14px;max-width:190px;cursor:pointer}
+#font-sel[hidden]{display:none}
