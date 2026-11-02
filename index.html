@@ -23,18 +23,37 @@
     <a class="pill" href="index.html">🏠 trang chủ</a><a class="pill" href="#da-hoan">🌱 đã lấp hố</a>
     <a class="pill" href="#dang-ra">⛏️ đang lấp hố</a><a class="pill" href="#cap-nhat">🔔 cập nhật</a><a class="pill" href="#review">⭐ review</a>
   </nav>
+
+  <!-- KHU VỰC AVATAR + LỜI NHẮN NHỦ -->
   <div class="board">
-    <div class="avatar"><img id="avatar-photo" alt="Ảnh đại diện"><img id="avatar-frame" alt="" hidden></div>
-    <section class="card"><h2>Đôi lời nhắn nhủ</h2>
+    <!-- CỘT TRÁI: AVATAR VÀ 2 Ô NHỎ BÊN DƯỚI -->
+    <div class="avatar-col">
+      <div class="avatar">
+        <img id="avatar-photo" alt="Ảnh đại diện">
+        <img id="avatar-frame" alt="" hidden>
+      </div>
+
+      <!-- 1. Nút Facebook -->
+      <a class="pill fb-btn" id="fb" href="#" target="_blank" rel="noopener">Facebook</a>
+
+      <!-- 2. Ô Lịch đăng dạng ấn vào sổ chữ ra (màu trắng) -->
+      <details class="sched sched-collapse" id="sched" hidden>
+        <summary>📌 Lịch đăng truyện</summary>
+        <div id="sched-text" class="sched-inner"></div>
+      </details>
+    </div>
+
+    <!-- CỘT PHẢI: CARD ĐÔI LỜI NHẮN NHỦ -->
+    <section class="card">
+      <h2>Đôi lời nhắn nhủ</h2>
       <p>Nếu thấy edit quá dở vui lòng thoát nhanh để tránh mất thời gian nha mấy bà.</p>
       <p>Gu tui chưa chắc đã là gu của bà, nếu không hợp vui lòng không miễn cưỡng.</p>
       <p>Tui thường đọc hết truyện rồi mới quyết định đào hay không, nên nếu có gì thắc mắc về truyện thì đừng ngại IB tui nha.</p>
       <p>Tui edit không gọi là nhanh nhưng khi mấy bà thấy truyện xuất hiện trên web nghĩa là tui đã edit được hơn một nửa rồi, nên cứ yên tâm tui không drop truyện đâu.</p>
       <img class="m1" src="images/mascot1.png" alt="">
     </section>
-    <aside class="col-r"><b>FACEBOOK</b><a class="pill" id="fb" href="#" target="_blank" rel="noopener">Facebook</a></aside>
   </div>
-  <aside class="sched" id="sched" hidden><b>📌 Lịch đăng truyện</b><div id="sched-text"></div></aside>
+
   <section class="shelf"><h2 class="ribbon" id="da-hoan">🌱 Đã lấp hố</h2><div class="sgrid" id="shelf-done"></div></section>
   <section class="shelf"><h2 class="ribbon" id="dang-ra">⛏️ Đang lấp hố</h2><div class="sgrid" id="shelf-on"></div></section>
   <div class="dual" id="cap-nhat">
