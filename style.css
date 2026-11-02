@@ -122,6 +122,40 @@ a.tagf:hover,i.tagf:hover,.tagf.on{background:var(--pink)}
 .chp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
 [hidden]{display:none!important}
 
+/* ================== [MỚI] MỤC LỤC (hết bị dính chùm) ================== */
+.toc-head,
+.toc-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 90px 70px 110px;
+  gap:10px;
+  align-items:center;
+  padding:9px 6px;
+  font-size:.9rem;
+}
+.toc-head{
+  font-weight:800;
+  border-bottom:2px solid var(--lilac);
+}
+.toc-row{border-top:1px dashed var(--lilac)}
+.toc-head+.toc-row{border-top:0}
+.toc-row:hover{background:var(--pink);border-radius:12px}
+.toc-row a{font-weight:700;overflow-wrap:anywhere}
+.toc-row a:hover{text-decoration:underline}
+.toc-row em{font-style:italic;color:var(--soft);font-size:.8rem}
+.toc-head span:not(:first-child),
+.toc-row>span,
+.toc-row>em{text-align:center;white-space:nowrap}
+.toc-total{margin:10px 0;color:var(--ink)}
+
+/* ================== [MỚI] NÚT "ĐỌC TIẾP" / HÀNG NÚT ================== */
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.btn small{font-size:.85em;font-weight:600;margin-left:.4em;opacity:.85}
+
+/* ================== [MỚI] FORM REVIEW (hết bị dính chùm) ================== */
+.rv label{display:block;margin:12px 0 4px;font-weight:700}
+.rv select{display:block;width:100%;max-width:100%;font:inherit;color:var(--ink);background:var(--paper);border:2px solid var(--lilac);border-radius:14px;padding:8px 12px;margin-bottom:4px}
+.rv .stars{display:flex;gap:2px;margin:4px 0 2px}
+
 /* ================== GIAO DIỆN DI ĐỘNG ================== */
 @media(max-width:899px){.sgrid .cover{flex-basis:82px}.sgrid .story{padding:10px;gap:10px}.sgrid .story b{font-size:.95rem}.sgrid .story span{font-size:.76rem}}
 @media(max-width:759px){.sgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -133,6 +167,9 @@ a.tagf:hover,i.tagf:hover,.tagf.on{background:var(--pink)}
   .jump{right:0;bottom:calc(76px + env(safe-area-inset-bottom,0px));gap:0;border:2px solid var(--lilac);border-right:0;border-radius:16px 0 0 16px;background:var(--paper);overflow:hidden}
   .jump button{width:36px;height:38px;padding:0;border:0;border-radius:0;background:transparent;font-size:15px;line-height:1;display:grid;place-items:center}
   .jump button+button{border-top:1px solid var(--lilac)}
+}
+@media(max-width:600px){
+  .toc-head,.toc-row{grid-template-columns:minmax(0,1fr) 56px 48px 86px;gap:6px;font-size:.8rem}
 }
 @media(max-width:559px){.sgrid{grid-template-columns:1fr}.sgrid .cover{flex-basis:100px}.sgrid .story{padding:12px;gap:12px}}
 @media(max-width:480px){.pager .btn{padding:8px 11px;font-size:.86rem}}
