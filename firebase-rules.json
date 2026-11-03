@@ -105,6 +105,16 @@
         ".write": "newData.exists()",
         ".validate": "newData.isNumber() && newData.val() >= 0 && ((!data.exists() && newData.val() == 1) || (data.exists() && newData.val() == data.val() + 1))"
       }
+    },
+    "views": {
+      ".read": true,
+      "$s": {
+        ".validate": "$s.matches(/^[A-Za-z0-9_-]{1,60}$/)",
+        "$c": {
+          ".write": "newData.exists()",
+          ".validate": "$c.matches(/^[A-Za-z0-9_-]{1,60}$/) && newData.isNumber() && newData.val() >= 1 && newData.val() <= 100000000 && ((!data.exists() && newData.val() == 1) || (data.exists() && newData.val() == data.val() + 1))"
+        }
+      }
     }
   }
 }
