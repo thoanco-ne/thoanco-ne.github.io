@@ -207,3 +207,7 @@ a.tagf:hover,i.tagf:hover,.tagf.on{background:var(--pink)}
 @media(max-width:480px){.pager .btn{padding:8px 11px;font-size:.86rem}#font-sel{max-width:132px;padding:8px 10px}.bar .btn{padding:8px 13px}}
 @media(max-width:430px){.pager{gap:5px}.pager .btn{flex:1 1 auto;min-width:0;padding:8px 5px;font-size:.76rem;overflow:hidden;text-overflow:ellipsis}}
 @media(max-width:350px){.pager .btn{padding:8px 3px;font-size:.7rem}}
+
+/* ---- khung chương mới / bình luận mới / review: dài quá thì cuộn ---- */
+#latest,#recent{max-height:290px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px}
+#rv-list{max-height:330px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px}
