@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 
 OUT = "public"
 SYSTEM = {"images", "fonts", "data", "public", "node_modules"}
+VN = timezone(timedelta(hours=7))
 SAFE = re.compile(r"^[A-Za-z0-9_-]{1,60}$")
 LINE = re.compile(r"^([A-Za-z0-9_-]+)\s*:\s*(.*?)(?:\s*\|\s*(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2})?\s*(?:Z|[+-]\d{2}:?\d{2})?))?\s*$")
 TIME = re.compile(r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2})?)\s*(Z|[+-]\d{2}:?\d{2})?$")
@@ -88,6 +89,7 @@ def optimize_images():
 
 def main():
     now = datetime.now(timezone.utc)
+    print(f"Giờ máy chủ lúc build: {now:%d/%m/%Y %H:%M} UTC = {now.astimezone(VN):%d/%m/%Y %H:%M} giờ Việt Nam")
     shutil.rmtree(OUT, ignore_errors=True)
     os.makedirs(OUT + "/data")
     for n in os.listdir("."):
@@ -108,13 +110,22 @@ def main():
             print("Bỏ qua thư mục tên không hợp lệ:", name); continue
         pub, waiting = [], 0
         for line in open(lp, encoding="utf-8").read().splitlines():
-            m = LINE.match(line.strip())
-            src = m and f"{name}/{m.group(1)}.txt"
-            if not m or not os.path.isfile(src):
+            if not line.strip():
                 continue
+            m = LINE.match(line.strip())
+            if not m:
+                print(f"  [{name}] Bỏ qua dòng không hiểu trong list.txt: {line.strip()[:60]}"); continue
+            src = f"{name}/{m.group(1)}.txt"
+            if not os.path.isfile(src):
+                print(f"  [{name}] CẢNH BÁO: list.txt có {m.group(1)} nhưng thiếu file {src}, chương này bị bỏ qua"); continue
             when = parse_time(m.group(3)) if m.group(3) else None
+            if m.group(3) and not when:
+                print(f"  [{name}] CẢNH BÁO: giờ của {m.group(1)} không đọc được ({m.group(3)}), chương đăng ngay")
             if when and when > now:
-                waiting += 1; continue
+                waiting += 1
+                left = int((when - now).total_seconds() // 60)
+                print(f"  [{name}] {m.group(1)} hẹn giờ {when.astimezone(VN):%d/%m/%Y %H:%M} (giờ Việt Nam), còn khoảng {left} phút")
+                continue
             pub.append((m.group(1), m.group(2).strip(), when or git_date(src)))
         if not pub:
             continue

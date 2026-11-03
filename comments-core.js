@@ -206,9 +206,22 @@ window.TAC = (function () {
     if (cb) ref.on("value", function (s) { cb(s.val() || 0); }, function () {});
     return true;
   }
+  /* ---- lượt đọc: views/{truyện}/{chương} = số lượt; mỗi chương chỉ cộng 1 lần cho mỗi phiên trình duyệt ---- */
+  function view(s, c) {
+    if (!init()) return false;
+    var k = "tac-view|" + s + "|" + c;
+    try { if (sessionStorage.getItem(k)) return true; sessionStorage.setItem(k, "1"); } catch (e) {}
+    db.ref("views/" + s + "/" + c).transaction(function (v) { return (v || 0) + 1; });
+    return true;
+  }
+  function watchViews(s, cb) {
+    if (!init()) return false;
+    db.ref("views/" + s).on("value", function (snap) { cb(snap.val() || {}); }, function () {});
+    return true;
+  }
   return { ready: ready, init: init, post: post, savedName: savedName,
            watchRecent: watchRecent, watchChapter: watchChapter,
            react: react, watchReactions: watchReactions,
            like: like, watchLikes: watchLikes, countByStory: countByStory,
-           postReview: postReview, watchReviews: watchReviews, bindName: bindName, presence: presence, countVisit: countVisit, names: names };
+           postReview: postReview, watchReviews: watchReviews, bindName: bindName, view: view, watchViews: watchViews, presence: presence, countVisit: countVisit, names: names };
 })();
