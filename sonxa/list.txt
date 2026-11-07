@@ -8,7 +8,7 @@ c7: Chương 7: Có phải đã làm chuyện gì hổ thẹn không | 2026-11-0
 c8: Chương 8: Ta có một người rất chán ghét | 2026-11-04T22:00:00+09:00
 c9: Chương 9: Ngươi cũng sắp rồi, bạn nhỏ | 2026-11-05T22:00:00+09:00
 c10: Chương 10: Ở lại, với tôi | 2026-11-06T22:00:00+09:00
-c11: Chương 11: Bộ dạng này của tôi kỳ lạ lắm sao? | 2026-11-07
+c11: Chương 11: Bộ dạng này của tôi kỳ lạ lắm sao? | 2026-11-06T22:00:00+09:00
 c12: Chương 12: Cuối cùng thì anh cũng là của em rồi
 c13: Chương 13: Trên núi có sơn thần
 c14: Chương 14: Đó là một cái đầu người
