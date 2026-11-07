@@ -1,7 +1,8 @@
-:root{--bg:#fdf3f7;--ink:#4b4468;--soft:#7d7799;--lilac:#cfc6ee;--pink:#f6c9dc;--moon:#f7d9a8;--paper:rgba(255,252,255,.88);--solid:#fffafd;--veil:rgba(255,255,255,0);--ff:none}
-:root[data-theme="dark"]{--bg:#1d1a30;--ink:#ece8ff;--soft:#b2abd6;--lilac:#54497f;--pink:#5b3a58;--moon:#8d7449;--paper:rgba(36,31,62,.9);--solid:#272244;--veil:rgba(18,14,36,.64);--ff:brightness(.5) saturate(.85);color-scheme:dark}
+:root{--page-bg:linear-gradient(135deg,#ffe3f0 0%,#f1e2ff 38%,#e0ebff 70%,#d7f0ff 100%);--bg:#f1e2ff;--ink:#4b4468;--soft:#7d7799;--lilac:#cfc6ee;--pink:#f6c9dc;--moon:#f7d9a8;--paper:rgba(255,252,255,.88);--solid:#fffafd;--veil:rgba(255,255,255,0);--ff:none}
+:root[data-theme="dark"]{--page-bg:linear-gradient(135deg,#3a2342 0%,#2a2250 40%,#1f2a52 75%,#1c3350 100%);--bg:#241f4a;--ink:#ece8ff;--soft:#b2abd6;--lilac:#54497f;--pink:#5b3a58;--moon:#8d7449;--paper:rgba(36,31,62,.9);--solid:#272244;--veil:rgba(18,14,36,0);--ff:brightness(.5) saturate(.85);color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;color:var(--ink);font-family:"Be Vietnam Pro",system-ui,sans-serif;min-height:100vh;background:var(--bg)}
+body{margin:0;color:var(--ink);font-family:"Be Vietnam Pro",system-ui,sans-serif;min-height:100vh;background:none}
+html{background:var(--bg)}
 a{color:inherit;text-decoration:none}
 .note{max-width:980px;margin:0 auto;padding:12px 16px 0;font-size:.85rem;color:var(--soft)}
 .tabs{max-width:980px;margin:8px auto 0;padding:0 16px;display:flex;gap:8px;flex-wrap:wrap}
@@ -9,7 +10,7 @@ a{color:inherit;text-decoration:none}
 .tabs button[aria-selected=true],.pill:hover,.btn:hover{background:var(--pink)}
 .view{display:none;max-width:980px;margin:0 auto;padding:14px 16px 90px}.view.on{display:block}
 .topbar{text-align:center;font-size:.78rem;padding:6px;background:var(--lilac);border-radius:99px;margin-bottom:12px}
-.awn{display:block;width:100%;border-radius:24px;filter:var(--ff);margin:0 auto}.shop{text-align:center}.logo{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:6px}.logo h1{margin:0;font:800 clamp(2rem,8vw,3rem) "Be Vietnam Pro",sans-serif}
+.shop{text-align:center}.logo{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:6px}.logo h1{margin:0;font:800 clamp(2rem,8vw,3rem) "Be Vietnam Pro",sans-serif}
 .sub{text-align:center;margin:0 0 12px;color:var(--soft)}
 .nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
 
@@ -212,9 +213,14 @@ a.tagf:hover,i.tagf:hover,.tagf.on{background:var(--pink)}
 #latest,#recent{max-height:290px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px}
 #rv-list{max-height:330px;overflow-y:auto;overscroll-behavior:contain;padding-right:6px}
 
-/* ---- hình nền dưa hấu: dọc cho điện thoại/iPad dọc, ngang cho máy tính/iPad ngang ---- */
-body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;
-  background:linear-gradient(var(--veil),var(--veil)),url("images/nen-dua-hau-ngang.webp") center bottom/cover no-repeat}
-@media (orientation:portrait){
-  body::before{background-image:linear-gradient(var(--veil),var(--veil)),url("images/nen-dua-hau-doc.webp")}
-}
+/* ---- nền pastel hồng - tím - xanh dương (lớp cố định, chạy tốt trên iPhone/iPad) ----
+   Muốn đổi kiểu nền: sửa --page-bg ở đầu file bằng 1 trong 2 dòng dưới đây
+   B (mây bông):
+   radial-gradient(60% 50% at 12% 8%,#ffd9ec 0%,transparent 70%),radial-gradient(55% 45% at 90% 15%,#d6e6ff 0%,transparent 70%),radial-gradient(60% 55% at 80% 90%,#e6d9ff 0%,transparent 70%),radial-gradient(55% 50% at 10% 85%,#d3f0ff 0%,transparent 70%),#f8eefc
+   C (hoàng hôn dịu):
+   linear-gradient(180deg,#ffdcec 0%,#eadcff 50%,#d4e8ff 100%)
+*/
+body::before{content:"";position:fixed;top:0;left:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;background:var(--page-bg)}
+
+/* ---- đầu trang khi không còn khung hoa ---- */
+.shop{padding-top:18px}
