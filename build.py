@@ -15,6 +15,7 @@ from datetime import datetime, timedelta, timezone
 OUT = "public"
 SYSTEM = {"images", "fonts", "data", "public", "node_modules"}
 VN = timezone(timedelta(hours=7))
+EDGE = os.path.isfile("functions/_middleware.js")
 SAFE = re.compile(r"^[A-Za-z0-9_-]{1,60}$")
 LINE = re.compile(r"^([A-Za-z0-9_-]+)\s*:\s*(.*?)(?:\s*\|\s*(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}(?::\d{2})?\s*(?:Z|[+-]\d{2}:?\d{2})?))?\s*$")
 TIME = re.compile(r"^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}(?::\d{2})?)\s*(Z|[+-]\d{2}:?\d{2})?$")
@@ -101,14 +102,14 @@ def main():
         if os.path.isdir(d):
             shutil.copytree(d, f"{OUT}/{d}")
 
-    stories, chapters = [], {}
+    stories, chapters, sched = [], {}, {}
     for name in sorted(os.listdir(".")):
         lp = os.path.join(name, "list.txt")
         if name.startswith(".") or name in SYSTEM or not os.path.isfile(lp):
             continue
         if not SAFE.match(name):
             print("Bỏ qua thư mục tên không hợp lệ:", name); continue
-        pub, waiting = [], 0
+        pub, waiting, allc = [], 0, []
         for line in open(lp, encoding="utf-8").read().splitlines():
             if not line.strip():
                 continue
@@ -125,12 +126,15 @@ def main():
                 waiting += 1
                 left = int((when - now).total_seconds() // 60)
                 print(f"  [{name}] {m.group(1)} hẹn giờ {when.astimezone(VN):%d/%m/%Y %H:%M} (giờ Việt Nam), còn khoảng {left} phút")
+                allc.append((m.group(1), m.group(2).strip(), when, when))
                 continue
-            pub.append((m.group(1), m.group(2).strip(), when or git_date(src)))
-        if not pub:
+            d = when or git_date(src)
+            pub.append((m.group(1), m.group(2).strip(), d))
+            allc.append((m.group(1), m.group(2).strip(), when, d))
+        if not pub and not EDGE:
             continue
         os.makedirs(f"{OUT}/{name}")
-        for cid, _, _ in pub:
+        for cid in ([c[0] for c in allc] if EDGE else [c[0] for c in pub]):   # kiểu hẹn giờ chính xác: chép cả chương chưa đến giờ, Cloudflare khóa lại
             shutil.copy(f"{name}/{cid}.txt", f"{OUT}/{name}/{cid}.txt")
         open(f"{OUT}/{name}/list.txt", "w", encoding="utf-8").write("\n".join(f"{c}: {t}" for c, t, _ in pub))
         info = {}
@@ -139,6 +143,7 @@ def main():
             except Exception: print("info.json lỗi ở", name)
         try: total = int(info.get("total") or 0)
         except (TypeError, ValueError): total = 0
+        raw = dict(info)
         finished = info.get("status") == "done" or (total > 0 and len(pub) >= total)   # đăng đủ tổng số chương thì tự hoàn
         if finished and info.get("status") != "done":
             print(f"{name}: đã đăng đủ {total} chương, tự chuyển sang Đã lấp hố")
@@ -148,13 +153,23 @@ def main():
         if cover:
             shutil.copy(cover, f"{OUT}/{cover}")
         g = info.get("genres", [])
-        stories.append({"id": name, "title": info.get("title") or name, "author": info.get("author", ""),
-                        "genres": g if isinstance(g, list) else [x.strip() for x in str(g).split(",") if x.strip()],
-                        "status": info["status"],
-                        "cover": cover, "count": len(pub), "total": total, "updated": max(d for _, _, d in pub).isoformat()})
-        chapters[name] = [{"id": c, "title": t, "date": d.isoformat()} for c, t, d in pub]
+        if pub:
+            stories.append({"id": name, "title": info.get("title") or name, "author": info.get("author", ""),
+                            "genres": g if isinstance(g, list) else [x.strip() for x in str(g).split(",") if x.strip()],
+                            "status": info["status"],
+                            "cover": cover, "count": len(pub), "total": total, "updated": max(d for _, _, d in pub).isoformat()})
+            chapters[name] = [{"id": c, "title": t, "date": d.isoformat()} for c, t, d in pub]
+        if EDGE:
+            sched[name] = {"info": raw, "total": total, "cover": cover,
+                           "chapters": [{"id": c, "title": t, "t": w.astimezone(timezone.utc).isoformat() if w else None, "date": d.isoformat()} for c, t, w, d in allc]}
         print(f"{name}: {len(pub)} chương đã đăng, {waiting} chương hẹn giờ")
 
+    if EDGE:
+        json.dump({"stories": sched}, open(f"{OUT}/_schedule.json", "w", encoding="utf-8"), ensure_ascii=False)
+        json.dump({"version": 1, "include": ["/data/*", "/_schedule.json"] + [f"/{k}/*" for k in sched], "exclude": []}, open(f"{OUT}/_routes.json", "w"))
+        print("Hẹn giờ chính xác: BẬT (Cloudflare Functions khóa chương đến đúng giờ mới mở)")
+    else:
+        print("Hẹn giờ chính xác: tắt (chưa có thư mục functions), chương hẹn giờ chỉ hiện khi build chạy lại")
     optimize_images()
     stories.sort(key=lambda s: s["updated"], reverse=True)
     json.dump(stories, open(f"{OUT}/data/stories.json", "w", encoding="utf-8"), ensure_ascii=False)
