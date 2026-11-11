@@ -1,48 +1,30 @@
-name: Phát hành web
-
-# Chạy mỗi khi bạn đăng file mới, hoặc bấm tay trong tab Actions
+name: Phát hành web lên Cloudflare Pages
 on:
   push:
     branches: [main]
+  schedule:
+    - cron: "7 */6 * * *"      # chỉ để dự phòng; chương hẹn giờ đã tự hiện đúng giờ nhờ thư mục functions
   workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: pages
+  group: deploy
   cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Cài thư viện xử lý font
-        run: pip install fonttools brotli pillow
-
-      - name: Đảo ký tự và đóng gói
-        env:
-          FONT_SEED: ${{ secrets.FONT_SEED }}
+      - name: Cài thư viện nén ảnh
+        run: pip install pillow
+      - name: Đóng gói web
         run: python build.py
-
-      - uses: actions/configure-pages@v5
-
-      - uses: actions/upload-pages-artifact@v3
+      - name: Đẩy lên Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         with:
-          path: public
-
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=${{ secrets.CLOUDFLARE_PROJECT }} --branch=main
