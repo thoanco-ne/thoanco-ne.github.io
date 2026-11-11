@@ -1,7 +1,7 @@
 name: Phát hành web lên Cloudflare Pages
 on:
   push:
-    branches: [main]
+    branches: [main] 
   schedule:
     - cron: "7 */6 * * *"      # chỉ để dự phòng; chương hẹn giờ đã tự hiện đúng giờ nhờ thư mục functions
   workflow_dispatch:
